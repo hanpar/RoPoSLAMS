@@ -1,0 +1,6 @@
+[submodule "src/A-LOAM"]
+	path = src/A-LOAM
+	url = git@github.com:vishrutskaushik/A-LOAM.git
+[submodule "src/floam"]
+	path = src/floam
+	url = git@github.com:vishrutskaushik/floam.git
