@@ -1,6 +1,6 @@
 # EECS 568 Group 17 Project
 
-1) Clone this repository recursively
-...
-git clone --recurse-submodules git@github.com:hanpar/eecs568-group17-project.git
-...
+### Clone repository recursively:
+```
+  git clone --recurse-submodules git@github.com:hanpar/eecs568-group17-project.git
+```
