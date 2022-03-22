@@ -1,0 +1,2 @@
+A-LOAM:floam
+-DCATKIN_DEVEL_PREFIX=/home/vishrut/ros_workspaces/eecs568-group17-project/devel -DCMAKE_INSTALL_PREFIX=/home/vishrut/ros_workspaces/eecs568-group17-project/install -G Unix Makefiles
