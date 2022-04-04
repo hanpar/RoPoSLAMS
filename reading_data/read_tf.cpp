@@ -69,7 +69,7 @@ int main(const int argc, const char *argv[]) {
     int i = 0;
 
     if (read_se_3_data(vertices, filename)){
-        cout << "IDX = " <<vertices.at(i).idx  << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;
+        cout << "IDX = " << vertices.at(i).idx  << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;
     }
 
     return 0;
