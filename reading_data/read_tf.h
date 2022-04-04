@@ -1,5 +1,5 @@
-#ifndef PART_ONE
-#define PART_ONE
+#ifndef READ_TF
+#define READ_TF
 #include <fstream>
 #include <iostream>
 #include <vector>
