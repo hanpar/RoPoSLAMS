@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/vishrut/ros_workspaces/eecs568-group17-project/gtsam-demo/LocalizationExample.cpp
+gtsam/geometry/Pose2.h
+-
+gtsam/inference/Key.h
+-
+gtsam/slam/BetweenFactor.h
+-
+gtsam/nonlinear/NonlinearFactorGraph.h
+-
+gtsam/nonlinear/Values.h
+-
+gtsam/nonlinear/LevenbergMarquardtOptimizer.h
+-
+gtsam/nonlinear/Marginals.h
+-
+gtsam/nonlinear/NonlinearFactor.h
+-
+
