@@ -18,23 +18,25 @@ void read_vector_se3_data(VECTOR_SE3 &vertex_se3, string line, int &idx){
     line = line.erase(0, len + 1);
 
     len = line.find(" ");
-    vertex_se3.qx = stod(line.substr(0, len));
+    vertex_se3.q.x() = stod(line.substr(0, len));
     line = line.erase(0, len + 1);
 
     len = line.find(" ");
-    vertex_se3.qy = stod(line.substr(0, len));
+    vertex_se3.q.y() = stod(line.substr(0, len));
     line = line.erase(0, len + 1);
 
     len = line.find(" ");
-    vertex_se3.qz = stod(line.substr(0, len));
+    vertex_se3.q.z() = stod(line.substr(0, len));
     line = line.erase(0, len + 1);
 
     len = line.find(" ");
-    vertex_se3.qw = stod(line.substr(0, len));
+    vertex_se3.q.w() = stod(line.substr(0, len));
     line = line.erase(0, len + 1);
+
+    vertex_se3.rotationMatrix = vertex_se3.q.normalized().toRotationMatrix();
 }
 
-bool read_se_3_data(vector<VECTOR_SE3> &vertex, string filname){
+bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname){
 
     ifstream g2o_file(filname);
     
@@ -50,7 +52,7 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertex, string filname){
     for(string line; getline(g2o_file, line); )
     {
         read_vector_se3_data(vertex_se3, line, idx);
-        vertex.push_back(vertex_se3);
+        vertices.push_back(vertex_se3);
     }
 
     g2o_file.close();
@@ -67,7 +69,7 @@ int main(const int argc, const char *argv[]) {
     int i = 0;
 
     if (read_se_3_data(vertices, filename)){
-        cout << vertices.at(i).idx  << " " << vertices.at(i).x << " " << vertices.at(i).y << " " << vertices.at(i).z  << " " << vertices.at(i).qx << " " << vertices.at(i).qy << " " << vertices.at(i).qz << " " << vertices.at(i).qw << endl;
+        cout << "IDX = " <<vertices.at(i).idx  << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;
     }
 
     return 0;
