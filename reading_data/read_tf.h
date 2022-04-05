@@ -10,7 +10,7 @@ using namespace std;
 
 class VECTOR_SE3{
     public:
-        string type;
+        long long int time;
         int idx;
         double x;
         double y;

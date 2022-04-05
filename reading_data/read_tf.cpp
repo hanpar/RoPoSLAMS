@@ -3,6 +3,25 @@
 void read_vector_se3_data(VECTOR_SE3 &vertex_se3, string line, int &idx){
     int len;
 
+    //Ignore 1st 3 Columns
+    len = line.find(" ");
+    line = line.erase(0, len + 1);
+    len = line.find(" ");
+    line = line.erase(0, len + 1);
+    len = line.find(" ");
+    line = line.erase(0, len + 1);
+
+    len = line.find(" ");
+    // cout << line.substr(0, len) << endl;
+    vertex_se3.time = stoll(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    //Ignore the next 2 Columns
+    len = line.find(" ");
+    line = line.erase(0, len + 1);
+    len = line.find(" ");
+    line = line.erase(0, len + 1);
+
     vertex_se3.idx = idx++;
 
     len = line.find(" ");
@@ -48,8 +67,13 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname){
 
     VECTOR_SE3 vertex_se3;
     int idx = 0;
+    
+    string line;
 
-    for(string line; getline(g2o_file, line); )
+    //Ignore 1st line
+    getline(g2o_file, line);
+
+    for(line; getline(g2o_file, line); )
     {
         read_vector_se3_data(vertex_se3, line, idx);
         vertices.push_back(vertex_se3);
@@ -64,12 +88,12 @@ int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
 
     //EDIT: Enter your txt file
-    string filename = "data/refined_tf_0018.txt";
+    string filename = "data/refined_tf.txt";
 
     int i = 0;
 
     if (read_se_3_data(vertices, filename)){
-        cout << "IDX = " << vertices.at(i).idx  << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;
+        cout << "IDX = " << vertices.at(i).idx << ", Time = " << vertices.at(i).time << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;
     }
 
     return 0;
