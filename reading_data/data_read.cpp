@@ -1,5 +1,20 @@
 #include "data_read.h"
 
+// GTSAM related includes.
+#include <gtsam/inference/Symbol.h>
+#include <gtsam/navigation/CombinedImuFactor.h>
+#include <gtsam/navigation/GPSFactor.h>
+#include <gtsam/navigation/ImuFactor.h>
+#include <gtsam/nonlinear/ISAM2.h>
+#include <gtsam/nonlinear/ISAM2Params.h>
+#include <gtsam/nonlinear/NonlinearFactorGraph.h>
+#include <gtsam/slam/BetweenFactor.h>
+#include <gtsam/slam/PriorFactor.h>
+#include <gtsam/slam/dataset.h>
+
+
+using namespace gtsam;
+
 void read_vector_se3_data(VECTOR_SE3 &vertex_se3, string line, int &idx){
     int len;
 
@@ -279,9 +294,38 @@ int main(const int argc, const char *argv[]) {
      	cout << "Quat Cov = " << measurements.at(j).accelCov << endl;
      	cout << "Rotation Matrix = " << measurements.at(j).rotationMatrix << endl; 
      	
-     	// j++; 
      }
 
+
+    // Integration
+    std::shared_ptr<PreintegratedImuMeasurements> current_summarized_measurement = nullptr;
+    auto imu_params = PreintegratedImuMeasurements::Params::MakeSharedU(9.8);
+    imu_params->accelerometerCovariance = I_3x3;  // acc white noise in continuous
+    imu_params->integrationCovariance = I_3x3;  // integration uncertainty continuous
+    imu_params->gyroscopeCovariance = I_3x3;  // gyro white noise in continuous
+    imu_params->omegaCoriolis = Vector3::Zero();
+
+    auto current_bias = 0;
+    size_t included_imu_measurement_count = 0;
+
+    for(int i = 1; i < (vertices.size()-1); ++i)
+    {
+        // testing integration
+        double t_previous = vertices[i - 1].time;
+
+    // Summarize IMU data between the previous GPS measurement and now
+        current_summarized_measurement = std::make_shared<PreintegratedImuMeasurements>(imu_params,current_bias);
+        double dt = 0;
+        while (j < measurements.size() && measurements[j].time <= vertices[i].time) {
+            if (measurements[j].time >= t_previous) {
+                dt = (measurements[j].time - measurements[j-1].time)*pow(10,-9);
+                current_summarized_measurement->integrateMeasurement(
+                    measurements[j].accel, measurements[j].gyro, dt);
+                included_imu_measurement_count++;
+            }
+            j++;
+        }
+    }
 
 
     return 0;

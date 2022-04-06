@@ -88,7 +88,7 @@ int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
 
     //EDIT: Enter your txt file
-    string filename = "data/refined_tf.txt";
+    string filename = "./data/refined_tf.txt";
 
     int i = 0;
 

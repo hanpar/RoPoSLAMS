@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector> 
 #include <string> 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 using namespace std; 
 using namespace Eigen; 
@@ -32,7 +32,9 @@ using namespace Eigen;
      line = line.erase(0, len + 1);  
      
      len = line.find(" "); 
-     meas.time = stoll(line.substr(0, len)); 
+     meas.time = stoll(line.substr(0, len));
+     meas.time = meas.time*pow(10,-9);
+ 
      line = line.erase(0, len + 1); 
      
      // don't need frame ID
@@ -186,7 +188,7 @@ using namespace Eigen;
   
   int main(){
      vector<ImuMeasurement> measurements;   
-     string filename = "../data/kitti_imu_raw.txt";
+     string filename = "./data/imu.txt";
      
      int i = 0; 
      while (loadKittiData(measurements,filename)){
