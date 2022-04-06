@@ -274,25 +274,24 @@ int main(const int argc, const char *argv[]) {
     vector<ImuMeasurement> measurements;   
     string filename2 = "data/imu.txt";
 
-    int i = 0;
-
+    //int k = 0; 
     if (read_se_3_data(vertices, filename))
     {
-        cout << "IDX = " << vertices.at(i).idx << ", Time = " << vertices.at(i).time << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;
+        /*cout << "IDX = " << vertices.at(i).idx << ", Time = " << vertices.at(i).time << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;*/
     }
 
-    int j = 0; 
+    //int j = 0; 
     
      if (loadKittiData(measurements,filename2))
      {
-     	cout << "IDX = " << measurements.at(j).idx << ", Time = " << measurements.at(j).time << endl;
+     	/*cout << "IDX = " << measurements.at(j).idx << ", Time = " << measurements.at(j).time << endl;
      	cout << "Quaternion x = " <<  measurements.at(j).q.x() << " y = " <<  measurements.at(j).q.y() << " z = " <<  measurements.at(j).q.z() << " w = " <<  measurements.at(j).q.w() << endl;
      	cout << "Quat Cov = " << measurements.at(j).qCov << endl; 
      	cout << "Gyro = " << measurements.at(j).gyro << endl;
      	cout << "Quat Cov = " << measurements.at(j).gyroCov << endl;
      	cout << "Accel = " << measurements.at(j).accel << endl; 
      	cout << "Quat Cov = " << measurements.at(j).accelCov << endl;
-     	cout << "Rotation Matrix = " << measurements.at(j).rotationMatrix << endl; 
+     	cout << "Rotation Matrix = " << measurements.at(j).rotationMatrix << endl; */
      	
      }
 
@@ -305,9 +304,9 @@ int main(const int argc, const char *argv[]) {
     imu_params->gyroscopeCovariance = I_3x3;  // gyro white noise in continuous
     imu_params->omegaCoriolis = Vector3::Zero();
 
-    auto current_bias = 0;
+    auto current_bias = imuBias::ConstantBias();
     size_t included_imu_measurement_count = 0;
-
+    int j = 0; 
     for(int i = 1; i < (vertices.size()-1); ++i)
     {
         // testing integration
@@ -318,15 +317,15 @@ int main(const int argc, const char *argv[]) {
         double dt = 0;
         while (j < measurements.size() && measurements[j].time <= vertices[i].time) {
             if (measurements[j].time >= t_previous) {
-                dt = (measurements[j].time - measurements[j-1].time)*pow(10,-9);
+                dt = ( measurements[j+1].time - measurements[j].time)*pow(10,-9);
                 current_summarized_measurement->integrateMeasurement(
                     measurements[j].accel, measurements[j].gyro, dt);
-                included_imu_measurement_count++;
+                //included_imu_measurement_count++;
             }
             j++;
         }
-    }
-
+        current_summarized_measurement->print(); 
+	}
 
     return 0;
 
