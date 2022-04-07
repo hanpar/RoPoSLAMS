@@ -6,7 +6,7 @@
 ```
 
 ### Building and running the code:
-  
+```
   cd pose_optimization
   mkdir build && cd build
   cmake ..
