@@ -8,11 +8,13 @@
 #include <gtsam/nonlinear/Marginals.h>
 #include <gtsam/nonlinear/Values.h>
 #include <gtsam/nonlinear/ISAM2.h>
+#include </mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h>
 
 #include "Pose3_tf.h"
 
 using namespace std;
 using namespace gtsam;
+namespace plt = matplotlibcpp;
 
 void read_vector_se3_data(VECTOR_SE3 &vertex_se3, string line, int &idx){
     int len;
@@ -115,9 +117,13 @@ int main(const int argc, const char *argv[]) {
     }
     NonlinearFactorGraph graph;
     Values initialEstimate;
+    vector<double> point_x, point_y;//, point_z;
     auto priorModel = noiseModel::Diagonal::Variances((Vector(6) << 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6).finished());
     int vec_size = vertices.size();
     for(int i = 0; i < vec_size; i++) {
+        point_x.push_back(vertices.at(i).x);
+        point_y.push_back(vertices.at(i).y);
+        //point_z.push_back(vertices.at(i).z);
         Rot3 Rot = Rot3(vertices.at(i).qw,vertices.at(i).qx,vertices.at(i).qy,vertices.at(i).qz);
         Point3 Trans = Point3(vertices.at(i).x,vertices.at(i).y,vertices.at(i).z);
         initialEstimate.insert(i, Pose3(Rot,Trans));
@@ -127,6 +133,11 @@ int main(const int argc, const char *argv[]) {
     }
     initialEstimate.print("\nInitial Estimate:\n");
     graph.print("\nFactor Graph:\n");
+
+    plt::plot(point_x,point_y);
+    plt::title("Initial F-LOAN Point");
+    plt::save("Initial_F-LOAN_Point.png");
+    plt::show();
 
     //Batch Solution
     /*
