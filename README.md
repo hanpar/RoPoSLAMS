@@ -4,7 +4,8 @@
 ```
   git clone --recurse-submodules git@github.com:hanpar/eecs568-group17-project.git
   
-  cd pose_optimization/build
+  cd pose_optimization
+  mkdir build && cd build
   cmake ..
   build
   ./pose_optimization
