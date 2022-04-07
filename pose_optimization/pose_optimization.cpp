@@ -95,17 +95,14 @@ int main(const int argc, const char *argv[]) {
     size_t included_imu_measurement_count = 0;
 
     size_t first_slam_pose = 1;
-    auto slam_skip = 2;
-    auto limit = slamPoses.size();
-    // auto limit = 10;
 
-    // auto noise_model_gps = noiseModel::Diagonal::Precisions(
-    // (Vector6() << Vector3::Constant(0), Vector3::Constant(1.0 / 0.07))
-    //     .finished());
+    // Something default code uses to skip vertices for GPS readings. Changing this greatly affects when the program fails.
+    // slam_skip = 1 means use every SLAM reading 
+    auto slam_skip = 2;
 
     auto slamNoiseModel = noiseModel::Diagonal::Variances((Vector(6) << 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6).finished());
 
-    for (size_t i = first_slam_pose; i < limit - 1; i++) {
+    for (size_t i = first_slam_pose; i < slamPoses.size() - 1; i++) {
         // At each non=IMU measurement we initialize a new node in the graph
         auto current_pose_key = X(i);
         auto current_vel_key = V(i);
@@ -238,97 +235,6 @@ int main(const int argc, const char *argv[]) {
     // }
 
     fclose(fp_out);
-
-
-
-
-    // //Initialize the grpah
-    // NonlinearFactorGraph graph;
-    
-    // //Initial Estimates for SLAM tf
-    // Values initialEstimate;
-
-    // vector<double> point_x, point_y;//, point_z;
-
-    // Rot3 priorRotation = Rot3(1.0, 0.0, 0.0, 0.0);
-    // Point3 priorPosition = Point3(0.0, 0.0, 0.0);
-    // auto priorNoise = noiseModel::Diagonal::Variances((Vector(6) << 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6).finished());
-
-    // Pose3 priorMean = Pose3(priorRotation, priorPosition);
-    
-    // int vec_size = vertices.size();
-    // for(int i = 0; i < vec_size; i++) {
-    //     if (i == 0) 
-    //     {
-    //         graph.addPrior(1, priorMean, priorNoise);
-    //     }
-
-    //     point_x.push_back(vertices.at(i).x);
-    //     point_y.push_back(vertices.at(i).y);
-    //     //point_z.push_back(vertices.at(i).z);
-    //     Rot3 rotation = Rot3(vertices.at(i).qw,vertices.at(i).qx,vertices.at(i).qy,vertices.at(i).qz);
-    //     Point3 translation = Point3(vertices.at(i).x,vertices.at(i).y,vertices.at(i).z);
-
-    //     initialEstimate.insert(i+1, Pose3(rotation, translation));
-        
-    // }
-
-    // initialEstimate.print("\nInitial Estimate:\n");
-    // graph.print("\nFactor Graph:\n");
-
-    // plt::plot(point_x,point_y);
-    // plt::title("Initial F-LOAN Point");
-    // plt::save("Initial_F-LOAN_Point.png");
-    // plt::show();
-
-    // //Batch Solution
-    // /*
-    // GaussNewtonParams params;
-    // params.setVerbosity("TERMINATION");  //  show info about stopping conditions
-    // GaussNewtonOptimizer optimizer(*graph, *initial, params);
-    // Values result = optimizer.optimize();
-    // result.print("result")
-    // */
-
-    // //Incremental Solution
-    // /*
-    // ISAM2Params parameters;
-    // parameters.relinearizeThreshold = 0.01;
-    // parameters.relinearizeSkip = 1;
-    // parameters.cacheLinearizedFactors = false;
-    // parameters.enableDetailedResults = true;
-    // parameters.print();
-    // ISAM2 isam(parameters);
-    // int graph_size
-    // for (int i = 0; i < vec_size; i++) {
-    //     NonlinearFactorGraph graph;
-    //     Values initialEstimate;
-    //     int id_p = vertices.at(i).idx;
-    //     if (id_p == 0) {
-    //         Rot3 Rot = Rot3(vertices.at(i).qw,vertices.at(i).qx,vertices.at(i).qy,vertices.at(i).qz);
-    //         Point3 Trans = Point3(vertices.at(i).x,vertices.at(i).y,vertices.at(i).z);
-    //         auto NoiseModel = noiseModel::Diagonal::Variances((Vector(6) << 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6).finished());
-    //         graph.addPrior(0, Pose3(Rot,Trans), NoiseModel);
-    //         initialEstimate.insert(id_p, Pose3(Rot,Trans));
-    //     } else {
-    //         Pose3 PrevPose = currentEstimate.atPose3(id_p-1);
-    //         initialEstimate.insert(id_p, PrevPose));
-    //         for (int j == 0; j < graph_size; j++) {
-    //             int id_e1 = 
-    //             int id_e2 =
-    //             Rot3 dRot = 
-    //             Point3 dTrans = 
-    //             vector info = 
-    //             if (id_e2 == id_p) {
-    //                 cov_model = noiseModel::Gaussian::Information(Info);
-    //                 graph.emplace_shared<BetweenFactor<Pose3> >(id_e1,id_e2,Pose3(dRot,dTrans),cov_model)
-    //             }
-    //         }
-    //     }
-    //     ISAM2Result result = isam.update(graph, initialEstimate);
-    //     Values currentEstimate = isam.calculateEstimate();
-    // } 
-    // */
 
     return 0;
 }
