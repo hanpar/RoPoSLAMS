@@ -7,4 +7,5 @@
   cd pose_optimization/build
   cmake ..
   build
+  ./pose_optimization
 ```
