@@ -7,6 +7,6 @@
   cd pose_optimization
   mkdir build && cd build
   cmake ..
-  build
+  make
   ./pose_optimization
 ```
