@@ -3,4 +3,8 @@
 ### Clone repository recursively:
 ```
   git clone --recurse-submodules git@github.com:hanpar/eecs568-group17-project.git
+  
+  cd pose_optimization/build
+  cmake ..
+  build
 ```
