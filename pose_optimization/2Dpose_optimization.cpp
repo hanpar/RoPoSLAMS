@@ -4,7 +4,7 @@ using namespace std;
 using namespace gtsam; 
 using namespace Eigen; 
 
-void runBatch(vector<VECTOR_SE3> slamPoses, vector<EDGE_SE3> imuMeasurements){
+void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     NonlinearFactorGraph graph;
     Values initial;
     
@@ -14,7 +14,7 @@ void runBatch(vector<VECTOR_SE3> slamPoses, vector<EDGE_SE3> imuMeasurements){
     
     // Add vertices and edges
     for (int i = 0; i < imuMeasurements.size(); i++){ 
-    	EDGE_SE3 tempEdge = imuMeasurements.at(i);
+    	EDGE_SE2 tempEdge = imuMeasurements.at(i);
     	noiseModel::Gaussian::shared_ptr model = noiseModel::Gaussian::Covariance(Vector3(1e-6,1e-6,1e-8)));
     	graph.add(BetweenFactor<Pose2>(tempEdge.idx,tempEdge.idx+1,Pose2(tempEdge.x,tempEdge.y,tempEdge.theta), model)); 
     	
@@ -34,7 +34,7 @@ void runBatch(vector<VECTOR_SE3> slamPoses, vector<EDGE_SE3> imuMeasurements){
     result.print(); 
 }
 
-void runISAM(vector<VECTOR_SE3> slamPoses, vector<EDGE_SE3> imuMeasurements){
+void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
 
     Values result; 
     ISAM2Params isam_params; 
@@ -70,10 +70,10 @@ void runISAM(vector<VECTOR_SE3> slamPoses, vector<EDGE_SE3> imuMeasurements){
 }
 
 int main(const int argc, const char *argv[]) {
-    vector<VECTOR_SE3> slamPoses;
+    vector<VECTOR_SE2> slamPoses;
     string slam_data = "../data/refined_tf.txt";
     
-    vector<EDGE_SE3> imuMeasurements;   
+    vector<EDGE_SE2> imuMeasurements;   
     string imu_data = "../data/imu.txt";
 
     KittiCalibration kittiCalibration;
