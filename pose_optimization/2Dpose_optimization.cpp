@@ -13,25 +13,46 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     graph.add(PriorFactor<Pose2>(slamPoses.at(0).idx, Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta), priorNoise));
     
     // Add vertices and edges
-    for (int i = 0; i < imuMeasurements.size(); i++){ 
+    for (int i = 1; i < imuMeasurements.size(); i++){ 
     	EDGE_SE2 tempEdge = imuMeasurements.at(i);
-    	noiseModel::Gaussian::shared_ptr model = noiseModel::Gaussian::Covariance(Vector3(1e-6,1e-6,1e-8)));
-    	graph.add(BetweenFactor<Pose2>(tempEdge.idx,tempEdge.idx+1,Pose2(tempEdge.x,tempEdge.y,tempEdge.theta), model)); 
+    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-8)); 
+    	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
     	
     }
+    cout << "EDGES added" << endl;
 
     for(int i = 0; i < slamPoses.size(); i++){
-    	Pose tempPose = slamPoses.at(i);
-    	initial.insert(tempPose.idx,Pose2(tempPose.x,tempPose.y,tempPose.theta));
+    	auto tempPose = slamPoses.at(i);
+    	initial.insert(i,Pose2(tempPose.x,tempPose.y,tempPose.theta));
     }
-    
+    cout << "Poses added" << endl;
     GaussNewtonParams parameters; 
     parameters.relativeErrorTol = 1e-5; 
     parameters.maxIterations = 100; 
     GaussNewtonOptimizer optimizer(graph,initial,parameters);
     
     Values result = optimizer.optimize();
-    result.print(); 
+    // result.print(); 
+
+      // Save results to file
+    printf("\nWriting results to file...\n");
+    string output_filename = "optimized_poses.txt";
+    FILE* fp_out = fopen(output_filename.c_str(), "w+");
+    fprintf(fp_out,
+            "#time(s),x(m),y(m),theta(m)\n");
+
+    for (size_t i = 0; i < slamPoses.size() - 1; i++) {
+
+        auto pose = result.at<Pose2>(i);
+
+        cout << "State at #" << i << endl;
+        cout << "Pose:" << endl << pose << endl;
+
+        fprintf(fp_out, "%lld, %f,%f,%f\n",
+                slamPoses[i].time, pose.x(), pose.y(), pose.theta());
+    }
+
+    fclose(fp_out);
 }
 
 void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
@@ -50,17 +71,19 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     	if (i == 0){
     	noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-8)); 
     	graph.add(PriorFactor<Pose2>(slamPoses.at(0).idx, Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta), priorNoise));
-    		initial.insert(slamPoses.at(0).idx,Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta));
+    		initial.insert(slamPoses.at(0).idx, Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta));
     	}
-    	else{
+    	else
+        {
     	   initial.insert(i,result.at(i-1)); 
-    	   for(int j = 0; j < imuMeasurements.size(); j++){
-    	   	VECTOR_SE3 imuMeasurements = edges.at(j);
-    	   	if (i==tempEdge.j){
+    	//    for(int j = 0; j < imuMeasurements.size(); j++){
+    	   	EDGE_SE2 tempEdge = imuMeasurements.at(i);
+            
+    	   	// if (i==tempEdge.idx+1){
 	    	noiseModel::Gaussian::shared_ptr model = noiseModel::Gaussian::Covariance(Vector3(0.05,0.05,0.05));
-	    	graph.add(BetweenFactor<Pose2>(tempEdge.idx,tempEdge.idx+1,Pose2(tempEdge.x,tempEdge.y,tempEdge.theta), model)); 
-    	   	}
-    	   }
+	    	graph.add(BetweenFactor<Pose2>(i-1, i, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
+    	   	// }
+    	//    }
     	}    	
     	isam.update(graph,initial); 
     	result = isam.calculateEstimate(); 
@@ -68,29 +91,64 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     result.print(); 
 }
 
+void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements){
+
+    double prev_vel_x = 0;
+    double prev_vel_y = 0;
+    double current_vel_x = 0;
+    double current_vel_y = 0;
+    double dt;
+
+    EDGE_SE2 imuMeasurement;
+
+    for(int i = 1; i < imuMeasurements_SE3.size() - 1; i++){
+        dt = (imuMeasurements_SE3.at(i).time - imuMeasurements_SE3.at(i-1).time) * pow(10, -9);
+        current_vel_x = prev_vel_x + imuMeasurements_SE3.at(i).accel(0) * dt;
+        current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
+
+        imuMeasurement.dx = current_vel_x * dt;
+        imuMeasurement.dy = current_vel_y * dt;
+
+        imuMeasurement.dtheta =  (double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2)));
+        imuMeasurement.time = imuMeasurements_SE3.at(i).time;
+        imuMeasurement.idx = imuMeasurements_SE3.at(i).idx;
+
+        imuMeasurements.push_back(imuMeasurement);
+        prev_vel_x = current_vel_x;
+        prev_vel_y = current_vel_y;
+    }
+
+}
+
 int main(const int argc, const char *argv[]) {
+    vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "../data/refined_tf.txt";
+    string slam_data = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/refined_tf.txt";
     
-    vector<EDGE_SE2> imuMeasurements;   
-    string imu_data = "../data/imu.txt";
+    vector<EDGE_SE3> imuMeasurements_SE3;
+    vector<EDGE_SE2> imuMeasurements;
+       
+    string imu_data = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/imu.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "../data/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/KittiEquivBiasedImu_metadata.txt";
 
-    //int k = 0; 
-    if (read_se_3_data(slamPoses, slam_data))
+    int i = 10; 
+    if (read_se_3_data(vertices, slamPoses, slam_data))
     {
-        cout << "SLAM Data Read Successfully!" << endl; 
+        // cout << vertices.at(i).q.x() << ", " << vertices.at(i).q.y() << ", " << vertices.at(i).q.z() << ", " << vertices.at(i).q.w() << endl;
+        // cout << "IDX = " << vertices_se2.at(i).idx << ", Time = " << vertices_se2.at(i).time << ", X = " << vertices_se2.at(i).x << ", Y = " << vertices_se2.at(i).y << ", Theta = " << vertices_se2.at(i).theta << endl;
     }
     else exit(1);
     
-    if (loadKittiData(imuMeasurements, kittiCalibration, imu_data, imu_metadata))
+    if (loadKittiData(imuMeasurements_SE3, kittiCalibration, imu_data, imu_metadata))
     {
         cout << "IMU Data Read Successfully!" << endl;
     } 
     else exit(1);
-    
-    runISAM(slamPoses, imuMeasurements); 
+
+    integrateIMUData(imuMeasurements_SE3, imuMeasurements);
+    cout << "Inetegrated IMU" <<endl;
+    runBatch(slamPoses, imuMeasurements); 
 }
     

@@ -3,7 +3,6 @@
 
 #include "reading_data/data_read.cpp"
 #include <gtsam/geometry/Pose3.h>
-
 // We will use simple integer Keys to refer to the robot poses.
 #include <gtsam/inference/Key.h>
 #include <gtsam/slam/BetweenFactor.h>
@@ -15,6 +14,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <math.h>
 // #include </home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h>
 
 using namespace std;
