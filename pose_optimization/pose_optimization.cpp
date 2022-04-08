@@ -78,8 +78,8 @@ int main(const int argc, const char *argv[]) {
 
     // Create the factor graph and values object that will store new factors and
     // values to add to the incremental graph
-    NonlinearFactorGraph new_factors;
-    Values new_values;  // values storing the initial estimates of new nodes in
+    NonlinearFactorGraph graph;
+    Values initialEstimate;  // values storing the initial estimates of new nodes in
                     // the factor graph
 
 
@@ -98,27 +98,34 @@ int main(const int argc, const char *argv[]) {
 
     // Something default code uses to skip vertices for GPS readings. Changing this greatly affects when the program fails.
     // slam_skip = 1 means use every SLAM reading 
-    auto slam_skip = 2;
+    auto slam_skip = 1;
 
-    auto slamNoiseModel = noiseModel::Diagonal::Variances((Vector(6) << 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6).finished());
+    // SUS
+    auto slamNoiseModel = noiseModel::Diagonal::Variances((Vector(6) << 3e-2, 3e-2, 3e-2, 1e-2, 1e-2, 1e-2).finished());
 
-    for (size_t i = first_slam_pose; i < slamPoses.size() - 1; i++) {
+    for (int i = first_slam_pose; i < slamPoses.size() - 1; i++) {
         // At each non=IMU measurement we initialize a new node in the graph
-        auto current_pose_key = X(i);
-        auto current_vel_key = V(i);
-        auto current_bias_key = B(i);
+        // auto current_pose_key = X(i);
+        // auto current_vel_key = V(i);
+        // auto current_bias_key = B(i);
+        auto current_pose_key = i;
+        auto current_vel_key = i;
+        auto current_bias_key = i;
         auto t = slamPoses[i].time;
 
         if (i == first_slam_pose) {
             // Create initial estimate and prior on initial pose, velocity, and biases
-            new_values.insert(current_pose_key, current_pose_global);
-            new_values.insert(current_vel_key, current_velocity_global);
-            new_values.insert(current_bias_key, current_bias);
-            new_factors.emplace_shared<PriorFactor<Pose3>>(current_pose_key, current_pose_global, sigma_init_x);
-            new_factors.emplace_shared<PriorFactor<Vector3>>(current_vel_key, current_velocity_global, sigma_init_v);
-            new_factors.emplace_shared<PriorFactor<imuBias::ConstantBias>>(current_bias_key, current_bias, sigma_init_b);
+            cout << "Current Pose Key = " << current_pose_key << endl;
+            initialEstimate.insert(current_pose_key, current_pose_global);
+            // initialEstimate.insert(current_vel_key, current_velocity_global);
+            // initialEstimate.insert(current_bias_key, current_bias);
+            graph.emplace_shared<PriorFactor<Pose3>>(current_pose_key, current_pose_global, sigma_init_x);
+            // graph.emplace_shared<PriorFactor<Vector3>>(current_vel_key, current_velocity_global, sigma_init_v);
+            // graph.emplace_shared<PriorFactor<imuBias::ConstantBias>>(current_bias_key, current_bias, sigma_init_b);
         } 
-        else{
+        else
+        {
+            cout << "Current Pose Key = " << current_pose_key << endl;
             double dt = 0;
             auto t_previous = slamPoses[i - 1].time;
 
@@ -137,11 +144,14 @@ int main(const int argc, const char *argv[]) {
                 j++;
             }
             // Create IMU factor
-            auto previous_pose_key = X(i - 1);
-            auto previous_vel_key = V(i - 1);
-            auto previous_bias_key = B(i - 1);
+            // auto previous_pose_key = X(i - 1);
+            // auto previous_vel_key = V(i - 1);
+            // auto previous_bias_key = B(i - 1);
+            auto previous_pose_key = i;
+            auto previous_vel_key = i;
+            auto previous_bias_key = i;
 
-            new_factors.emplace_shared<ImuFactor>(previous_pose_key, previous_vel_key, current_pose_key,
+            graph.emplace_shared<ImuFactor>(previous_pose_key, previous_vel_key, current_pose_key,
                 current_vel_key, previous_bias_key, *current_summarized_measurement);
 
 
@@ -149,7 +159,7 @@ int main(const int argc, const char *argv[]) {
             auto sigma_between_b = noiseModel::Diagonal::Sigmas((Vector6() << Vector3::Constant(sqrt(included_imu_measurement_count) * kittiCalibration.accelerometer_bias_sigma),
                                                                 Vector3::Constant(sqrt(included_imu_measurement_count) * kittiCalibration.gyroscope_bias_sigma)).finished());
             
-            new_factors.emplace_shared<BetweenFactor<imuBias::ConstantBias>>(
+            graph.emplace_shared<BetweenFactor<imuBias::ConstantBias>>(
                 previous_bias_key, current_bias_key, imuBias::ConstantBias(),
                 sigma_between_b);
 
@@ -157,37 +167,36 @@ int main(const int argc, const char *argv[]) {
             auto slamPose = Pose3(Rot3(slamPoses.at(i).rotationMatrix), Point3(slamPoses.at(i).x, slamPoses.at(i).y, slamPoses.at(i).z));
             
             if ((i % slam_skip) == 0) {
-                new_factors.emplace_shared<PriorFactor<Pose3>>(
-                    current_pose_key, slamPose, slamNoiseModel);
-                new_values.insert(current_pose_key, slamPose);
 
-                cout << "############ POSE INCLUDED AT TIME" << t << "############\n";
-                cout << slamPose.translation();
+                graph.emplace_shared<PriorFactor<Pose3>>(
+                    current_pose_key, slamPose, slamNoiseModel);
+                initialEstimate.insert(current_pose_key, slamPose);
+
+                // cout << "############ POSE INCLUDED AT TIME" << t << "############\n";
+                // cout << slamPose.translation();
                 cout << endl;
             } 
             else {
-                new_values.insert(current_pose_key, current_pose_global);
+                initialEstimate.insert(current_pose_key, current_pose_global);
             }
-            // new_values.insert(current_pose_key, slamPose);
+            // initialEstimate.insert(current_pose_key, slamPose);
             // Add initial values for velocity and bias based on the previous
             // estimates
-            new_values.insert(current_vel_key, current_velocity_global);
-            new_values.insert(current_bias_key, current_bias);
+            initialEstimate.insert(current_vel_key, current_velocity_global);
+            initialEstimate.insert(current_bias_key, current_bias);
 
             // Update solver
             // =======================================================================
-            // We accumulate 2*GPSskip GPS measurements before updating the solver at
-            // first so that the heading becomes observable.
             if (i > (first_slam_pose + 2 * slam_skip)) {
                 printf("############ NEW FACTORS AT TIME %lld ############\n",
                         t);
-                new_factors.print();
+                // graph.print();
 
-                isam.update(new_factors, new_values);
+                isam.update(graph, initialEstimate);
                 cout << "after isam update i = " << i << endl;
                 // Reset the newFactors and newValues list
-                new_factors.resize(0);
-                new_values.clear();
+                graph.resize(0);
+                initialEstimate.clear();
 
                 // Extract the result/current estimates
                 Values result = isam.calculateEstimate();

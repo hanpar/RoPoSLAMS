@@ -33,22 +33,40 @@ class VECTOR_SE3{
         Eigen::Matrix3d rotationMatrix;
 };
 
+class VECTOR_SE2{
+    public:
+        long long int time;
+        int idx;
+        double x;
+        double y;
+        double theta;
+};
 
-void read_vector_se3_data(VECTOR_SE3 &vertex_se3, string line);
+
+void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line);
 bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname);
 
  struct EDGE_SE3 {
     public: 
-    string type; 
-    int idx; 
-    long long int time; 
-    Eigen::Vector3d gyro;
-    Eigen::Vector3d accel; 
-    Eigen::Quaterniond q; 
-    Eigen::Matrix3d rotationMatrix; 
-    Eigen::Matrix3d qCov;
-    Eigen::Matrix3d gyroCov; 
-    Eigen::Matrix3d accelCov;     
+      string type; 
+      int idx; 
+      long long int time; 
+      Eigen::Vector3d gyro;
+      Eigen::Vector3d accel; 
+      Eigen::Quaterniond q; 
+      Eigen::Matrix3d rotationMatrix; 
+      Eigen::Matrix3d qCov;
+      Eigen::Matrix3d gyroCov; 
+      Eigen::Matrix3d accelCov;     
+ };
+
+  struct EDGE_SE2 {
+    public: 
+      int idx; 
+      long long int time; 
+      double dx;
+      double dy;
+      double dtheta;
  };
 
  struct KittiCalibration {

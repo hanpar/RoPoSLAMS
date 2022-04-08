@@ -1,6 +1,21 @@
 #include "data_read.h"
 
-void read_vector_se3_data(VECTOR_SE3 &vertex_se3, string line, int &idx){
+
+void get_se2_from_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2){
+    vertex_se2.time = vertex_se3.time;
+    vertex_se2.idx = vertex_se3.idx;    
+    vertex_se2.x = vertex_se3.x;
+    vertex_se2.y = vertex_se3.y;
+
+    // auto y = (double) atan2(2 * (q.w() * q.y() + q.x() * q.z()), 1 - 2 * (pow(q.y(), 2) + pow(q.x(), 2)));
+    // auto x = (double) asin(2 * (q.w() * q.x() - q.z() * q.y()));
+    vertex_se2.theta = (double) atan2(2 * (vertex_se3.q.w() * vertex_se3.q.z() + vertex_se3.q.y() * vertex_se3.q.x()), 1 - 2 * (pow(vertex_se3.q.x(), 2) + pow(vertex_se3.q.z(), 2)));
+
+    // auto euler_angles = vertex_se3.rotationMatrix.eulerAngles(0, 1, 2);
+    // vertex_se2.theta = euler_angles[2];
+
+}
+void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int idx){
     int len;
 
     //Ignore 1st 3 Columns
@@ -53,9 +68,12 @@ void read_vector_se3_data(VECTOR_SE3 &vertex_se3, string line, int &idx){
     line = line.erase(0, len + 1);
 
     vertex_se3.rotationMatrix = vertex_se3.q.normalized().toRotationMatrix();
+
+    get_se2_from_se3_data(vertex_se3, vertex_se2);
+
 }
 
-bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname){
+bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_se2, string filname){
 
     ifstream g2o_file(filname);
     
@@ -66,6 +84,7 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname){
     int len = 0;
 
     VECTOR_SE3 vertex_se3;
+    VECTOR_SE2 vertex_se2;
     int idx = 0;
     
     string line;
@@ -75,8 +94,10 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname){
 
     for(line; getline(g2o_file, line); )
     {
-        read_vector_se3_data(vertex_se3, line, idx);
+        read_vector_se3_data(vertex_se3, vertex_se2, line, idx);
         vertices.push_back(vertex_se3);
+        vertices_se2.push_back(vertex_se2);
+
     }
 
     g2o_file.close();
@@ -282,6 +303,7 @@ void fixKittiData(EDGE_SE3 &meas, string line, int &idx){
 
 // int main(const int argc, const char *argv[]) {
 //     vector<VECTOR_SE3> vertices;
+//     vector<VECTOR_SE2> vertices_se2;
 //     string slam_data = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/refined_tf.txt";
     
 //     vector<EDGE_SE3> edges;   
@@ -290,58 +312,59 @@ void fixKittiData(EDGE_SE3 &meas, string line, int &idx){
 //     KittiCalibration kittiCalibration;
 //     string imu_metadata = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/KittiEquivBiasedImu_metadata.txt";
 
-//     //int k = 0; 
-//     if (read_se_3_data(vertices, slam_data))
+//     int i = 10; 
+//     if (read_se_3_data(vertices, vertices_se2, slam_data))
 //     {
-//         /*cout << "IDX = " << vertices.at(i).idx << ", Time = " << vertices.at(i).time << ", X = " << vertices.at(i).x << ", Y = " << vertices.at(i).y << ", Z = " << vertices.at(i).z  << endl << "Rotation Matrix: \n" << vertices.at(i).rotationMatrix << endl;*/
+//         cout << vertices.at(i).q.x() << ", " << vertices.at(i).q.y() << ", " << vertices.at(i).q.z() << ", " << vertices.at(i).q.w() << endl;
+//         cout << "IDX = " << vertices_se2.at(i).idx << ", Time = " << vertices_se2.at(i).time << ", X = " << vertices_se2.at(i).x << ", Y = " << vertices_se2.at(i).y << ", Theta = " << vertices_se2.at(i).theta << endl;
 //     }
 
 //     //int j = 0; 
     
-//      if (loadKittiData(edges, kittiCalibration, imu_data, imu_metadata))
-//      {
-//      	/*cout << "IDX = " << measurements.at(j).idx << ", Time = " << measurements.at(j).time << endl;
-//      	cout << "Quaternion x = " <<  measurements.at(j).q.x() << " y = " <<  measurements.at(j).q.y() << " z = " <<  measurements.at(j).q.z() << " w = " <<  measurements.at(j).q.w() << endl;
-//      	cout << "Quat Cov = " << measurements.at(j).qCov << endl; 
-//      	cout << "Gyro = " << measurements.at(j).gyro << endl;
-//      	cout << "Quat Cov = " << measurements.at(j).gyroCov << endl;
-//      	cout << "Accel = " << measurements.at(j).accel << endl; 
-//      	cout << "Quat Cov = " << measurements.at(j).accelCov << endl;
-//      	cout << "Rotation Matrix = " << measurements.at(j).rotationMatrix << endl; */
+//     //  if (loadKittiData(edges, kittiCalibration, imu_data, imu_metadata))
+//     //  {
+//     //  	/*cout << "IDX = " << measurements.at(j).idx << ", Time = " << measurements.at(j).time << endl;
+//     //  	cout << "Quaternion x = " <<  measurements.at(j).q.x() << " y = " <<  measurements.at(j).q.y() << " z = " <<  measurements.at(j).q.z() << " w = " <<  measurements.at(j).q.w() << endl;
+//     //  	cout << "Quat Cov = " << measurements.at(j).qCov << endl; 
+//     //  	cout << "Gyro = " << measurements.at(j).gyro << endl;
+//     //  	cout << "Quat Cov = " << measurements.at(j).gyroCov << endl;
+//     //  	cout << "Accel = " << measurements.at(j).accel << endl; 
+//     //  	cout << "Quat Cov = " << measurements.at(j).accelCov << endl;
+//     //  	cout << "Rotation Matrix = " << measurements.at(j).rotationMatrix << endl; */
      	
-//      }
+//     //  }
 
 
-//     // Integration
-//     std::shared_ptr<PreintegratedImuMeasurements> current_summarized_measurement = nullptr;
-//     auto imu_params = PreintegratedImuMeasurements::Params::MakeSharedU(9.8);
-//     imu_params->accelerometerCovariance = I_3x3;  // acc white noise in continuous
-//     imu_params->integrationCovariance = I_3x3;  // integration uncertainty continuous
-//     imu_params->gyroscopeCovariance = I_3x3;  // gyro white noise in continuous
-//     imu_params->omegaCoriolis = Vector3::Zero();
+//     // // Integration
+//     // std::shared_ptr<PreintegratedImuMeasurements> current_summarized_measurement = nullptr;
+//     // auto imu_params = PreintegratedImuMeasurements::Params::MakeSharedU(9.8);
+//     // imu_params->accelerometerCovariance = I_3x3;  // acc white noise in continuous
+//     // imu_params->integrationCovariance = I_3x3;  // integration uncertainty continuous
+//     // imu_params->gyroscopeCovariance = I_3x3;  // gyro white noise in continuous
+//     // imu_params->omegaCoriolis = Vector3::Zero();
 
-//     auto current_bias = imuBias::ConstantBias();
-//     size_t included_imu_measurement_count = 0;
-//     int j = 0; 
-//     for(int i = 1; i < (vertices.size()-1); ++i)
-//     {
-//         // testing integration
-//         double t_previous = vertices[i - 1].time;
+//     // auto current_bias = imuBias::ConstantBias();
+//     // size_t included_imu_measurement_count = 0;
+//     // int j = 0; 
+//     // for(int i = 1; i < (vertices.size()-1); ++i)
+//     // {
+//     //     // testing integration
+//     //     double t_previous = vertices[i - 1].time;
 
-//     // Summarize IMU data between the previous GPS measurement and now
-//         current_summarized_measurement = std::make_shared<PreintegratedImuMeasurements>(imu_params,current_bias);
-//         double dt = 0;
-//         while (j < edges.size() && edges[j].time <= vertices[i].time) {
-//             if (edges[j].time >= t_previous) {
-//                 dt = ( edges[j+1].time - edges[j].time)*pow(10,-9);
-//                 current_summarized_measurement->integrateMeasurement(
-//                     edges[j].accel, edges[j].gyro, dt);
-//                 //included_imu_measurement_count++;
-//             }
-//             j++;
-//         }
-//         // current_summarized_measurement->print(); 
-// 	}
+//     // // Summarize IMU data between the previous GPS measurement and now
+//     //     current_summarized_measurement = std::make_shared<PreintegratedImuMeasurements>(imu_params,current_bias);
+//     //     double dt = 0;
+//     //     while (j < edges.size() && edges[j].time <= vertices[i].time) {
+//     //         if (edges[j].time >= t_previous) {
+//     //             dt = ( edges[j+1].time - edges[j].time)*pow(10,-9);
+//     //             current_summarized_measurement->integrateMeasurement(
+//     //                 edges[j].accel, edges[j].gyro, dt);
+//     //             //included_imu_measurement_count++;
+//     //         }
+//     //         j++;
+//     //     }
+//     //     // current_summarized_measurement->print(); 
+// 	// }
 
 //     return 0;
 
