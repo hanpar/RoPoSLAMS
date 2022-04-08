@@ -48,7 +48,6 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     	graph.resize(0); 
     	Values initial; 
     	if (i == 0){
-    	// Add prior
     	noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-8)); 
     	graph.add(PriorFactor<Pose2>(slamPoses.at(0).idx, Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta), priorNoise));
     		initial.insert(slamPoses.at(0).idx,Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta));
