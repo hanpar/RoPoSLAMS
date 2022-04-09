@@ -9,50 +9,58 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     Values initial;
     
     // Add prior
-    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-8)); 
-    graph.add(PriorFactor<Pose2>(slamPoses.at(0).idx, Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta), priorNoise));
+    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-2,1e-2,1e-2)); 
+    graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 0), priorNoise));
     
     // Add vertices and edges
-    for (int i = 1; i < imuMeasurements.size(); i++){ 
+    int limit = imuMeasurements.size();
+    cout << "Imu measurement = " << limit;
+    cout << "SLAM measurement = " << slamPoses.size();
+    
+    // int limit = 100;
+    for (int i = 2; i < limit - 1; i++){ 
     	EDGE_SE2 tempEdge = imuMeasurements.at(i);
-    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-8)); 
+    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(5e-1,5e-1,5e-2)); 
     	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
     	
     }
     cout << "EDGES added" << endl;
 
-    for(int i = 0; i < slamPoses.size(); i++){
+    // limit = slamPoses.size();
+    // limit = 50;
+    for(int i = 1; i < limit; i++){
     	auto tempPose = slamPoses.at(i);
-    	initial.insert(i,Pose2(tempPose.x,tempPose.y,tempPose.theta));
+    	initial.insert(i, Pose2(tempPose.x,tempPose.y,tempPose.theta));
     }
     cout << "Poses added" << endl;
     GaussNewtonParams parameters; 
     parameters.relativeErrorTol = 1e-5; 
-    parameters.maxIterations = 100; 
+    parameters.maxIterations = 10000; 
     GaussNewtonOptimizer optimizer(graph,initial,parameters);
+    // LevenbergMarquardtOptimizer optimizer(graph, initial);
     
     Values result = optimizer.optimize();
-    // result.print(); 
+    result.print(); 
 
       // Save results to file
-    printf("\nWriting results to file...\n");
-    string output_filename = "optimized_poses.txt";
-    FILE* fp_out = fopen(output_filename.c_str(), "w+");
-    fprintf(fp_out,
-            "#time(s),x(m),y(m),theta(m)\n");
+    // printf("\nWriting results to file...\n");
+    // string output_filename = "optimized_poses.txt";
+    // FILE* fp_out = fopen(output_filename.c_str(), "w+");
+    // fprintf(fp_out,
+    //         "#time(s),x(m),y(m),theta(m)\n");
 
-    for (size_t i = 0; i < slamPoses.size() - 1; i++) {
+    // for (size_t i = 0; i < slamPoses.size() - 1; i++) {
 
-        auto pose = result.at<Pose2>(i);
+    //     auto pose = result.at<Pose2>(i);
 
-        cout << "State at #" << i << endl;
-        cout << "Pose:" << endl << pose << endl;
+    //     cout << "State at #" << i << endl;
+    //     cout << "Pose:" << endl << pose << endl;
 
-        fprintf(fp_out, "%lld, %f,%f,%f\n",
-                slamPoses[i].time, pose.x(), pose.y(), pose.theta());
-    }
+    //     fprintf(fp_out, "%lld, %f,%f,%f\n",
+    //             slamPoses[i].time, pose.x(), pose.y(), pose.theta());
+    // }
 
-    fclose(fp_out);
+    // fclose(fp_out);
 }
 
 void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
@@ -65,7 +73,7 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     
     NonlinearFactorGraph graph;
     // Add vertices and edges
-    for (int i = 0; i < slamPoses.size(); i++){
+    for (int i = 0; i < slamPoses.size() - 1; i++){
     	graph.resize(0); 
     	Values initial; 
     	if (i == 0){
@@ -100,8 +108,9 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     double dt;
 
     EDGE_SE2 imuMeasurement;
-
-    for(int i = 1; i < imuMeasurements_SE3.size() - 1; i++){
+    int limit = imuMeasurements_SE3.size() ;
+    // int limit = 100;
+    for(int i = 1; i < limit; i++){
         dt = (imuMeasurements_SE3.at(i).time - imuMeasurements_SE3.at(i-1).time) * pow(10, -9);
         current_vel_x = prev_vel_x + imuMeasurements_SE3.at(i).accel(0) * dt;
         current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
@@ -109,9 +118,11 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
         imuMeasurement.dx = current_vel_x * dt;
         imuMeasurement.dy = current_vel_y * dt;
 
-        imuMeasurement.dtheta =  (double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2)));
+        imuMeasurement.dtheta =  (double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2))) * dt;
         imuMeasurement.time = imuMeasurements_SE3.at(i).time;
         imuMeasurement.idx = imuMeasurements_SE3.at(i).idx;
+
+        // cout << "dx = " << imuMeasurement.dx << " dy = " << imuMeasurement.dy << " dtheta = " << imuMeasurement.dtheta <<endl;
 
         imuMeasurements.push_back(imuMeasurement);
         prev_vel_x = current_vel_x;
@@ -123,15 +134,15 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/refined_tf.txt";
+    string slam_data = "../data/refined_tf.txt";
     
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
        
-    string imu_data = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/imu.txt";
+    string imu_data = "../data/imu.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "../data/KittiEquivBiasedImu_metadata.txt";
 
     int i = 10; 
     if (read_se_3_data(vertices, slamPoses, slam_data))
