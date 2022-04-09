@@ -1,13 +1,13 @@
+cmake_minimum_required(VERSION 3.10)
+
 project(2Dpose_optimization)
-cmake_minimum_required(VERSION 2.8)
-
-find_package(GTSAM REQUIRED)
-
-include_directories(${GTSAM_INCLUDE_DIR})
 
 add_executable(2Dpose_optimization 2Dpose_optimization.cpp)
-add_executable(pose_optimization pose_optimization.cpp)
-
-target_link_libraries(2Dpose_optimization gtsam)
-
-target_link_libraries(pose_optimization gtsam)
+add_executable(plot plot.cpp)
+#set_target_properties(Task1 PROPERTIES CXX_EXTENSIONS OFF)
+find_package(GTSAM REQUIRED)
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+include_directories(${GTSAM_INCLUDE_DIR})
+target_link_libraries(2Dpose_optimization gtsam ${PYTHON_LIBRARIES})
+target_link_libraries(plot gtsam ${PYTHON_LIBRARIES})
