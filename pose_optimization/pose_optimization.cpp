@@ -2,18 +2,22 @@
 
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> slamPoses;
-    string slam_data = "../data/refined_tf.txt";
+    vector<VECTOR_SE2> vertices;
+    string slam_data = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/refined_tf.txt";
     
-    vector<EDGE_SE3> imuMeasurements;   
-    string imu_data = "../data/imu.txt";
+    vector<EDGE_SE3> imuMeasurements;
+    // vector<EDGE_SE2> imuMeasurements;
+       
+    string imu_data = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/imu.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "../data/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "/home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/data/KittiEquivBiasedImu_metadata.txt";
 
-    //int k = 0; 
-    if (read_se_3_data(slamPoses, slam_data))
+    int i = 10; 
+    if (read_se_3_data(slamPoses, vertices, slam_data))
     {
-        cout << "SLAM Data Read Successfully!" << endl; 
+        // cout << vertices.at(i).q.x() << ", " << vertices.at(i).q.y() << ", " << vertices.at(i).q.z() << ", " << vertices.at(i).q.w() << endl;
+        // cout << "IDX = " << vertices_se2.at(i).idx << ", Time = " << vertices_se2.at(i).time << ", X = " << vertices_se2.at(i).x << ", Y = " << vertices_se2.at(i).y << ", Theta = " << vertices_se2.at(i).theta << endl;
     }
     else exit(1);
     
@@ -48,7 +52,7 @@ int main(const int argc, const char *argv[]) {
     auto current_bias = imuBias::ConstantBias();  
 
     auto sigma_init_x = noiseModel::Diagonal::Precisions((Vector6() << Vector3::Constant(0), Vector3::Constant(1.0)).finished());
-    auto sigma_init_v = noiseModel::Diagonal::Sigmas(Vector3::Constant(1000.0));
+    auto sigma_init_v = noiseModel::Diagonal::Sigmas(Vector3::Constant(1.0));
     auto sigma_init_b = noiseModel::Diagonal::Sigmas((Vector6() << Vector3::Constant(0.100), Vector3::Constant(5.00e-05)).finished());
 
     // Set IMU preintegration parameters
@@ -101,27 +105,27 @@ int main(const int argc, const char *argv[]) {
     auto slam_skip = 1;
 
     // SUS
-    auto slamNoiseModel = noiseModel::Diagonal::Variances((Vector(6) << 3e-2, 3e-2, 3e-2, 1e-2, 1e-2, 1e-2).finished());
+    auto slamNoiseModel = noiseModel::Diagonal::Variances((Vector(6) << 3e-6, 3e-6, 3e-6, 1e-6, 1e-6, 1e-6).finished());
 
     for (int i = first_slam_pose; i < slamPoses.size() - 1; i++) {
         // At each non=IMU measurement we initialize a new node in the graph
-        // auto current_pose_key = X(i);
-        // auto current_vel_key = V(i);
-        // auto current_bias_key = B(i);
-        auto current_pose_key = i;
-        auto current_vel_key = i;
-        auto current_bias_key = i;
+        auto current_pose_key = X(i);
+        auto current_vel_key = V(i);
+        auto current_bias_key = B(i);
+        // auto current_pose_key = i;
+        // auto current_vel_key = i;
+        // auto current_bias_key = i;
         auto t = slamPoses[i].time;
 
         if (i == first_slam_pose) {
             // Create initial estimate and prior on initial pose, velocity, and biases
             cout << "Current Pose Key = " << current_pose_key << endl;
             initialEstimate.insert(current_pose_key, current_pose_global);
-            // initialEstimate.insert(current_vel_key, current_velocity_global);
-            // initialEstimate.insert(current_bias_key, current_bias);
+            initialEstimate.insert(current_vel_key, current_velocity_global);
+            initialEstimate.insert(current_bias_key, current_bias);
             graph.emplace_shared<PriorFactor<Pose3>>(current_pose_key, current_pose_global, sigma_init_x);
-            // graph.emplace_shared<PriorFactor<Vector3>>(current_vel_key, current_velocity_global, sigma_init_v);
-            // graph.emplace_shared<PriorFactor<imuBias::ConstantBias>>(current_bias_key, current_bias, sigma_init_b);
+            graph.emplace_shared<PriorFactor<Vector3>>(current_vel_key, current_velocity_global, sigma_init_v);
+            graph.emplace_shared<PriorFactor<imuBias::ConstantBias>>(current_bias_key, current_bias, sigma_init_b);
         } 
         else
         {
@@ -144,12 +148,12 @@ int main(const int argc, const char *argv[]) {
                 j++;
             }
             // Create IMU factor
-            // auto previous_pose_key = X(i - 1);
-            // auto previous_vel_key = V(i - 1);
-            // auto previous_bias_key = B(i - 1);
-            auto previous_pose_key = i;
-            auto previous_vel_key = i;
-            auto previous_bias_key = i;
+            auto previous_pose_key = X(i - 1);
+            auto previous_vel_key = V(i - 1);
+            auto previous_bias_key = B(i - 1);
+            // auto previous_pose_key = i;
+            // auto previous_vel_key = i;
+            // auto previous_bias_key = i;
 
             graph.emplace_shared<ImuFactor>(previous_pose_key, previous_vel_key, current_pose_key,
                 current_vel_key, previous_bias_key, *current_summarized_measurement);
@@ -173,7 +177,7 @@ int main(const int argc, const char *argv[]) {
                 initialEstimate.insert(current_pose_key, slamPose);
 
                 // cout << "############ POSE INCLUDED AT TIME" << t << "############\n";
-                // cout << slamPose.translation();
+                cout << slamPose.translation();
                 cout << endl;
             } 
             else {

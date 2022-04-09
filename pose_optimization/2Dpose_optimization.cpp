@@ -9,7 +9,7 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     Values initial;
     
     // Add prior
-    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-2,1e-2,1e-2)); 
+    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-8)); 
     graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 0), priorNoise));
     
     // Add vertices and edges
@@ -20,13 +20,13 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     // int limit = 100;
     for (int i = 2; i < limit - 1; i++){ 
     	EDGE_SE2 tempEdge = imuMeasurements.at(i);
-    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(5e-1,5e-1,5e-2)); 
+    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(4e-6,4e-6,4e-8)); 
     	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
     	
     }
     cout << "EDGES added" << endl;
 
-    // limit = slamPoses.size();
+    limit = slamPoses.size();
     // limit = 50;
     for(int i = 1; i < limit; i++){
     	auto tempPose = slamPoses.at(i);
@@ -42,25 +42,25 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     Values result = optimizer.optimize();
     result.print(); 
 
-      // Save results to file
-    // printf("\nWriting results to file...\n");
-    // string output_filename = "optimized_poses.txt";
-    // FILE* fp_out = fopen(output_filename.c_str(), "w+");
-    // fprintf(fp_out,
-    //         "#time(s),x(m),y(m),theta(m)\n");
+    //   Save results to file
+    printf("\nWriting results to file...\n");
+    string output_filename = "optimized_poses_without_imu.txt";
+    FILE* fp_out = fopen(output_filename.c_str(), "w+");
+    fprintf(fp_out,
+            "#time(s),x(m),y(m),theta(m)\n");
 
-    // for (size_t i = 0; i < slamPoses.size() - 1; i++) {
+    for (size_t i = 1; i < slamPoses.size() - 1; i++) {
 
-    //     auto pose = result.at<Pose2>(i);
+        auto pose = result.at<Pose2>(i);
 
-    //     cout << "State at #" << i << endl;
-    //     cout << "Pose:" << endl << pose << endl;
+        cout << "State at #" << i << endl;
+        cout << "Pose:" << endl << pose << endl;
 
-    //     fprintf(fp_out, "%lld, %f,%f,%f\n",
-    //             slamPoses[i].time, pose.x(), pose.y(), pose.theta());
-    // }
+        fprintf(fp_out, "%lld, %f,%f,%f\n",
+                slamPoses[i].time, pose.x(), pose.y(), pose.theta());
+    }
 
-    // fclose(fp_out);
+    fclose(fp_out);
 }
 
 void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
@@ -108,8 +108,8 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     double dt;
 
     EDGE_SE2 imuMeasurement;
-    int limit = imuMeasurements_SE3.size() ;
-    // int limit = 100;
+    // int limit = imuMeasurements_SE3.size() ;
+    int limit = 100;
     for(int i = 1; i < limit; i++){
         dt = (imuMeasurements_SE3.at(i).time - imuMeasurements_SE3.at(i-1).time) * pow(10, -9);
         current_vel_x = prev_vel_x + imuMeasurements_SE3.at(i).accel(0) * dt;
