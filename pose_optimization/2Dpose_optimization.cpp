@@ -172,12 +172,12 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "../data/refined_tf.txt";
+    string slam_data = "../data/kitti_2011_09_30_drive_0018.txt";
     
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
        
-    string imu_data = "../data/imu.txt";
+    string imu_data = "../data/imu_kitti_2011_09_30_drive_0018.txt";
 
     KittiCalibration kittiCalibration;
     string imu_metadata = "../data/KittiEquivBiasedImu_metadata.txt";
