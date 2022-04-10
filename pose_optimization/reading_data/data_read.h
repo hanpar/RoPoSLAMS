@@ -94,6 +94,18 @@ struct GPS_DATA{
     Eigen::Matrix3d PositionCov; 
 };
 
+struct GROUND_TRUE {
+  public:
+    double gt_x;
+    double gt_y;
+    double gt_z;
+};
+
+struct IMU_CORR {
+  public:
+    double IMU_x;
+    double IMU_y;
+};
 void fixGPSData(GPS_DATA &gps, string line, int &idx);
 bool loadGPSData(vector<GPS_DATA>& gps_measurements, string gps_data_file);
 //  #

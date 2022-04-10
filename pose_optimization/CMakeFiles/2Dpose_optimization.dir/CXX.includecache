@@ -11,6 +11,8 @@ pose_optimization.h
 /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/pose_optimization.h
 /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h
 -
+cmath
+-
 
 /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/pose_optimization.h
 reading_data/data_read.cpp

@@ -377,12 +377,12 @@ void fixGPSData(GPS_DATA &gps, string line, int &idx) {
     } 
     // ignore first line
     getline(gps_file,line); 
-    int len = 0; 
+    int len = 0;
     GPS_DATA measurement; 
-    int idx = 0; 
-
+    int idx = 0;
+    
     while(getline(gps_file, line)){
-        fixGPSData(measurement, line, idx); 
+        fixGPSData(measurement, line, idx);
         //cout << line << endl; 
         gps_measurements.push_back(measurement); 
     }

@@ -164,7 +164,7 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     plt::figure(2);
     plt::plot(IMU_x,IMU_y);
     plt::title("IMU Trajectory");
-    plt::show();
+    //plt::show();
 }
 
 int main(const int argc, const char *argv[]) {

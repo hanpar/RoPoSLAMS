@@ -1,5 +1,6 @@
 #include "pose_optimization.h"
 #include </mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h>
+#include <cmath>
 
 using namespace std; 
 using namespace gtsam; 
@@ -7,7 +8,7 @@ using namespace Eigen;
 
 namespace plt = matplotlibcpp;
 
-void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
+void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, vector<GROUND_TRUE> gt, vector<IMU_CORR> imu_corr){
     NonlinearFactorGraph graph;
     Values initial;
     
@@ -17,8 +18,8 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     
     // Add vertices and edges
     int limit = imuMeasurements.size();
-    cout << "Imu measurement = " << limit;
-    cout << "SLAM measurement = " << slamPoses.size() << endl;
+    cout << "Imu measurement = " << limit << " GPS measurement = " << gt.size();
+    cout << " SLAM measurement = " << slamPoses.size() << endl;
     
     //int limit = 100;
     for (int i = 2; i < limit - 1; i++){ 
@@ -67,16 +68,30 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
         post_y.push_back(pose.y());
     }
     //cout << "slamePose size" << slamPoses.size() << endl;
+    vector<double> gt_x,gt_y;
+    for (int i = 0; i < gt.size(); i++) {
+        gt_x.push_back(gt.at(i).gt_x);
+        gt_y.push_back(gt.at(i).gt_y);
+    }
 
+    vector<double> imu_x,imu_y;
+    for (int i = 0; i < imu_corr.size(); i++) {
+        imu_x.push_back(imu_corr.at(i).IMU_x);
+        imu_y.push_back(imu_corr.at(i).IMU_y);
+    }
     fclose(fp_out);
     plt::figure(1);
-    plt::plot(floam_x,floam_y);
-    plt::plot(post_x,post_y);
+    plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+    plt::plot(post_x,post_y,{{"label", "Batch Result"}});
+    plt::plot(imu_x,imu_y,{{"label", "IMU"}});
+    plt::plot(gt_x,gt_y,{{"label", "Ground True"}});
     plt::title("Post Process");
-    plt::figure(2);
+    plt::legend();
+    plt::save("result.png");
+    /*plt::figure(2);
     plt::plot(floam_x,floam_y,"-s");
     plt::title("Floam Initial");
-    plt::show();
+    plt::show();*/
 }
 
 void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
@@ -115,7 +130,7 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     //result.print(); 
 }
 
-void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements){
+void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements, vector<IMU_CORR> &imu_corr){
 
     double prev_vel_x = 4.8;
     double prev_vel_y = 0;
@@ -133,9 +148,10 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     fprintf(fp_out,
             "#idx, dt(s),dx(m),dy(m),dtheta(m)\n");
     vector<double> IMU_x, IMU_y;
+    IMU_CORR imu;
     IMU_x.push_back(corr_x);
     IMU_y.push_back(corr_y);
-    int limit = imuMeasurements_SE3.size() ;
+    int limit = imuMeasurements_SE3.size();
     //int limit = 200;
     for(int i = 1; i < limit; i++){
         dt = (imuMeasurements_SE3.at(i).time - imuMeasurements_SE3.at(i-1).time) * pow(10, -9);
@@ -165,11 +181,49 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
         IMU_y.push_back(corr_y);
         prev_vel_x = current_vel_x;
         prev_vel_y = current_vel_y;
+        imu.IMU_x = corr_x;
+        imu.IMU_y = corr_y;
+        imu_corr.push_back(imu);
     }
     cout << "IMU Mesurement size" << imuMeasurements_SE3.size() << endl;
-    plt::figure(3);
+    plt::figure(2);
     plt::plot(IMU_x,IMU_y);
     plt::title("IMU Trajectory");
+}
+
+void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE> &gt) {
+    double pre_x = 0;
+    double pre_y = 0;
+    double pre_z = 0;
+    GROUND_TRUE gt_point;
+    vector<double> x,y,z;
+    bool First = true;
+    for (int i = 0; i < gpsMeasurements.size(); i++) {
+        if (i == 0) {
+            //pre_x = 6371007.2*sin(gpsMeasurements.at(i).latitude)*sin(gpsMeasurements.at(i).longitude);
+            //pre_y = 6371007.2*cos(gpsMeasurements.at(i).latitude)*sin(gpsMeasurements.at(i).longitude);
+            pre_x = gpsMeasurements.at(i).longitude;
+            pre_y = gpsMeasurements.at(i).latitude;
+            pre_z = gpsMeasurements.at(i).altitude;
+            gt_point.gt_x = 0;
+            gt_point.gt_y = 0;
+            gt_point.gt_z = 0;
+            First = false;
+        } else {
+            //gt_point.gt_x = 6371007.2*sin(gpsMeasurements.at(i).latitude)*sin(gpsMeasurements.at(i).longitude) - pre_x;
+            //gt_point.gt_y = 6371007.2*cos(gpsMeasurements.at(i).latitude)*sin(gpsMeasurements.at(i).longitude) - pre_y;
+            gt_point.gt_x = (gpsMeasurements.at(i).longitude - pre_x) * 72880;
+            gt_point.gt_y = (gpsMeasurements.at(i).latitude - pre_y) * 111111;
+            gt_point.gt_z = gpsMeasurements.at(i).altitude - pre_z;
+        }
+        gt.push_back(gt_point);
+        x.push_back(gt_point.gt_x);
+        y.push_back(gt_point.gt_y);
+        z.push_back(gt_point.gt_z);
+    }
+    plt::figure(3);
+    plt::plot(x,y);
+    plt::title("GPS Ground Ture");
 }
 
 int main(const int argc, const char *argv[]) {
@@ -179,6 +233,7 @@ int main(const int argc, const char *argv[]) {
     
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
+    vector<IMU_CORR> IMU_corr;
        
     string imu_data = "./data/imu_kitti_2011_09_30_drive_0018.txt";
 
@@ -186,6 +241,7 @@ int main(const int argc, const char *argv[]) {
     string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
     vector<GPS_DATA> GPSMeasurements;
+    vector<GROUND_TRUE> gt;
     string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
 
     int i = 10; 
@@ -208,8 +264,12 @@ int main(const int argc, const char *argv[]) {
     } 
     else exit(1);
 
-    integrateIMUData(imuMeasurements_SE3, imuMeasurements);
+    Calculate_GroundTrue(GPSMeasurements, gt);
+    integrateIMUData(imuMeasurements_SE3, imuMeasurements, IMU_corr);
     cout << "Inetegrated IMU" <<endl;
-    runBatch(slamPoses, imuMeasurements); 
+    runBatch(slamPoses, imuMeasurements, gt, IMU_corr);
+
+
+    plt::show();
 }
     
