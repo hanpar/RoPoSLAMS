@@ -15,10 +15,10 @@
 ########################
 
 //Value Computed by CMake
-2Dpose_optimization_BINARY_DIR:STATIC=/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization
+3Dpose_optimization_BINARY_DIR:STATIC=/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization
 
 //Value Computed by CMake
-2Dpose_optimization_SOURCE_DIR:STATIC=/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization
+3Dpose_optimization_SOURCE_DIR:STATIC=/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization
 
 Boost_CHRONO_LIBRARY_RELEASE:STRING=/usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.71.0
 
@@ -175,7 +175,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=2Dpose_optimization
+CMAKE_PROJECT_NAME:STATIC=3Dpose_optimization
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib

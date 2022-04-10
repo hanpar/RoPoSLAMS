@@ -13,7 +13,7 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     
     // Add prior
     noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(2e-8,2e-8,2e-8)); 
-    graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 0), priorNoise));
+    graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 1.74), priorNoise));
     
     // Add vertices and edges
     int limit = imuMeasurements.size();
@@ -49,7 +49,7 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     vector<double> post_x, post_y;
     //   Save results to file
     printf("\nWriting results to file...\n");
-    string output_filename = "optimized_poses_without_imu.txt";
+    string output_filename = "optimized_poses_with_imu.txt";
     FILE* fp_out = fopen(output_filename.c_str(), "w+");
     fprintf(fp_out,
             "#time(s),x(m),y(m),theta(m)\n");
@@ -175,15 +175,18 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "./data/refined_tf.txt";
+    string slam_data = "./data/floam_tf_kitti_2011_09_30_drive_0018.txt";
     
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
        
-    string imu_data = "./data/imu.txt";
+    string imu_data = "./data/imu_kitti_2011_09_30_drive_0018.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "./data/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
+
+    vector<GPS_DATA> GPSMeasurements;
+    string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
 
     int i = 10; 
     if (read_se_3_data(vertices, slamPoses, slam_data))
@@ -196,6 +199,12 @@ int main(const int argc, const char *argv[]) {
     if (loadKittiData(imuMeasurements_SE3, kittiCalibration, imu_data, imu_metadata))
     {
         cout << "IMU Data Read Successfully!" << endl;
+    } 
+    else exit(1);
+
+    if (loadGPSData(GPSMeasurements, gps_data))
+    {
+        cout << "GPS Data Read Successfully!" << endl;
     } 
     else exit(1);
 

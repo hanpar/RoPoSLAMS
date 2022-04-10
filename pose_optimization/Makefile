@@ -111,19 +111,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named plot
-
-# Build rule for target.
-plot: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 plot
-.PHONY : plot
-
-# fast build rule for target.
-plot/fast:
-	$(MAKE) -f CMakeFiles/plot.dir/build.make CMakeFiles/plot.dir/build
-.PHONY : plot/fast
-
-#=============================================================================
 # Target rules for targets named 2Dpose_optimization
 
 # Build rule for target.
@@ -135,6 +122,19 @@ plot/fast:
 2Dpose_optimization/fast:
 	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/build
 .PHONY : 2Dpose_optimization/fast
+
+#=============================================================================
+# Target rules for targets named 3Dpose_optimization
+
+# Build rule for target.
+3Dpose_optimization: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 3Dpose_optimization
+.PHONY : 3Dpose_optimization
+
+# fast build rule for target.
+3Dpose_optimization/fast:
+	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/build
+.PHONY : 3Dpose_optimization/fast
 
 2Dpose_optimization.o: 2Dpose_optimization.cpp.o
 
@@ -163,32 +163,32 @@ plot/fast:
 	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization.cpp.s
 .PHONY : 2Dpose_optimization.cpp.s
 
-plot.o: plot.cpp.o
+3Dpose_optimization.o: 3Dpose_optimization.cpp.o
 
-.PHONY : plot.o
+.PHONY : 3Dpose_optimization.o
 
 # target to build an object file
-plot.cpp.o:
-	$(MAKE) -f CMakeFiles/plot.dir/build.make CMakeFiles/plot.dir/plot.cpp.o
-.PHONY : plot.cpp.o
+3Dpose_optimization.cpp.o:
+	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/3Dpose_optimization.cpp.o
+.PHONY : 3Dpose_optimization.cpp.o
 
-plot.i: plot.cpp.i
+3Dpose_optimization.i: 3Dpose_optimization.cpp.i
 
-.PHONY : plot.i
+.PHONY : 3Dpose_optimization.i
 
 # target to preprocess a source file
-plot.cpp.i:
-	$(MAKE) -f CMakeFiles/plot.dir/build.make CMakeFiles/plot.dir/plot.cpp.i
-.PHONY : plot.cpp.i
+3Dpose_optimization.cpp.i:
+	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/3Dpose_optimization.cpp.i
+.PHONY : 3Dpose_optimization.cpp.i
 
-plot.s: plot.cpp.s
+3Dpose_optimization.s: 3Dpose_optimization.cpp.s
 
-.PHONY : plot.s
+.PHONY : 3Dpose_optimization.s
 
 # target to generate assembly for a file
-plot.cpp.s:
-	$(MAKE) -f CMakeFiles/plot.dir/build.make CMakeFiles/plot.dir/plot.cpp.s
-.PHONY : plot.cpp.s
+3Dpose_optimization.cpp.s:
+	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/3Dpose_optimization.cpp.s
+.PHONY : 3Dpose_optimization.cpp.s
 
 # Help Target
 help:
@@ -198,14 +198,14 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... plot"
 	@echo "... 2Dpose_optimization"
+	@echo "... 3Dpose_optimization"
 	@echo "... 2Dpose_optimization.o"
 	@echo "... 2Dpose_optimization.i"
 	@echo "... 2Dpose_optimization.s"
-	@echo "... plot.o"
-	@echo "... plot.i"
-	@echo "... plot.s"
+	@echo "... 3Dpose_optimization.o"
+	@echo "... 3Dpose_optimization.i"
+	@echo "... 3Dpose_optimization.s"
 .PHONY : help
 
 

@@ -298,8 +298,97 @@ void fixKittiData(EDGE_SE3 &meas, string line, int &idx){
     return 1; 
   }
 
+void fixGPSData(GPS_DATA &gps, string line, int &idx) {
+     int len; 
+     gps.idx = idx++; 
+     
+     // don't need time or seq
+     len = line.find(" "); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     line = line.erase(0, len + 1);  
+     
+     len = line.find(" "); 
+     gps.time = stoll(line.substr(0, len)); 
+     line = line.erase(0, len + 1); 
+     
+     // don't need frame ID, status, service
+     len = line.find(" "); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     line = line.erase(0, len + 1); 
+     len = line.find(" "); 
+     line = line.erase(0, len + 1); 
+     
+     len = line.find(" "); 
+     gps.latitude = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1); 
+     
+     len = line.find(" "); 
+     gps.longitude = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1); 
+     
+     len = line.find(" "); 
+     gps.altitude = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1); 
+     
+     len = line.find(" "); 
+     gps.PositionCov(0,0) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     gps.PositionCov(0,1) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     gps.PositionCov(0,2) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     gps.PositionCov(1,0) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     gps.PositionCov(1,1)= stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     gps.PositionCov(1,2) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     gps.PositionCov(2,0) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     gps.PositionCov(2,1) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     len = line.find(" "); 
+     gps.PositionCov(2,2) = stod(line.substr(0, len)); 
+     line = line.erase(0, len + 1);
+     //Eigen::Matrix3d<double,-1,-1> m;
+     // m = {{c0,c1,c2},{c3,c4,c5},{c6,c7,c8}};
+     // meas.qCov = m; 
+     // don't need COV type
+     len = line.find(" "); 
+     line = line.erase(0, len + 1);
+  }
 
+  bool loadGPSData(vector<GPS_DATA>& gps_measurements, string gps_data_file) {
+    
+    string line;
+    
+    ifstream gps_file(gps_data_file);
 
+    if(!gps_file.good()){
+        cout << "Invalid GPS data file\n";
+        return 0; 
+    } 
+    // ignore first line
+    getline(gps_file,line); 
+    int len = 0; 
+    GPS_DATA measurement; 
+    int idx = 0; 
+
+    while(getline(gps_file, line)){
+        fixGPSData(measurement, line, idx); 
+        //cout << line << endl; 
+        gps_measurements.push_back(measurement); 
+    }
+    gps_file.close(); 
+    return 1; 
+  }
 
 // int main(const int argc, const char *argv[]) {
 //     vector<VECTOR_SE3> vertices;
