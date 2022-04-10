@@ -1,5 +1,5 @@
 #include "pose_optimization.h"
-#include </mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h>
+#include <../reading_data/matplotlib-cpp/matplotlibcpp.h>
 
 using namespace std; 
 using namespace gtsam; 
@@ -172,15 +172,15 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "./data/refined_tf.txt";
+    string slam_data = "../data/refined_tf.txt";
     
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
        
-    string imu_data = "./data/imu.txt";
+    string imu_data = "../data/imu.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "./data/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "../data/KittiEquivBiasedImu_metadata.txt";
 
     int i = 10; 
     if (read_se_3_data(vertices, slamPoses, slam_data))
