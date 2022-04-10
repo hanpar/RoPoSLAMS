@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization
+CMAKE_SOURCE_DIR = /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization
+CMAKE_BINARY_DIR = /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/CMakeFiles /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/CMakeFiles /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,84 +111,44 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named 2Dpose_optimization
+# Target rules for targets named read_data
 
 # Build rule for target.
-2Dpose_optimization: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 2Dpose_optimization
-.PHONY : 2Dpose_optimization
+read_data: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 read_data
+.PHONY : read_data
 
 # fast build rule for target.
-2Dpose_optimization/fast:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/build
-.PHONY : 2Dpose_optimization/fast
+read_data/fast:
+	$(MAKE) -f CMakeFiles/read_data.dir/build.make CMakeFiles/read_data.dir/build
+.PHONY : read_data/fast
 
-#=============================================================================
-# Target rules for targets named 3Dpose_optimization
+data_read.o: data_read.cpp.o
 
-# Build rule for target.
-3Dpose_optimization: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 3Dpose_optimization
-.PHONY : 3Dpose_optimization
-
-# fast build rule for target.
-3Dpose_optimization/fast:
-	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/build
-.PHONY : 3Dpose_optimization/fast
-
-2Dpose_optimization.o: 2Dpose_optimization.cpp.o
-
-.PHONY : 2Dpose_optimization.o
+.PHONY : data_read.o
 
 # target to build an object file
-2Dpose_optimization.cpp.o:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization.cpp.o
-.PHONY : 2Dpose_optimization.cpp.o
+data_read.cpp.o:
+	$(MAKE) -f CMakeFiles/read_data.dir/build.make CMakeFiles/read_data.dir/data_read.cpp.o
+.PHONY : data_read.cpp.o
 
-2Dpose_optimization.i: 2Dpose_optimization.cpp.i
+data_read.i: data_read.cpp.i
 
-.PHONY : 2Dpose_optimization.i
-
-# target to preprocess a source file
-2Dpose_optimization.cpp.i:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization.cpp.i
-.PHONY : 2Dpose_optimization.cpp.i
-
-2Dpose_optimization.s: 2Dpose_optimization.cpp.s
-
-.PHONY : 2Dpose_optimization.s
-
-# target to generate assembly for a file
-2Dpose_optimization.cpp.s:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization.cpp.s
-.PHONY : 2Dpose_optimization.cpp.s
-
-3Dpose_optimization.o: 3Dpose_optimization.cpp.o
-
-.PHONY : 3Dpose_optimization.o
-
-# target to build an object file
-3Dpose_optimization.cpp.o:
-	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/3Dpose_optimization.cpp.o
-.PHONY : 3Dpose_optimization.cpp.o
-
-3Dpose_optimization.i: 3Dpose_optimization.cpp.i
-
-.PHONY : 3Dpose_optimization.i
+.PHONY : data_read.i
 
 # target to preprocess a source file
-3Dpose_optimization.cpp.i:
-	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/3Dpose_optimization.cpp.i
-.PHONY : 3Dpose_optimization.cpp.i
+data_read.cpp.i:
+	$(MAKE) -f CMakeFiles/read_data.dir/build.make CMakeFiles/read_data.dir/data_read.cpp.i
+.PHONY : data_read.cpp.i
 
-3Dpose_optimization.s: 3Dpose_optimization.cpp.s
+data_read.s: data_read.cpp.s
 
-.PHONY : 3Dpose_optimization.s
+.PHONY : data_read.s
 
 # target to generate assembly for a file
-3Dpose_optimization.cpp.s:
-	$(MAKE) -f CMakeFiles/3Dpose_optimization.dir/build.make CMakeFiles/3Dpose_optimization.dir/3Dpose_optimization.cpp.s
-.PHONY : 3Dpose_optimization.cpp.s
+data_read.cpp.s:
+	$(MAKE) -f CMakeFiles/read_data.dir/build.make CMakeFiles/read_data.dir/data_read.cpp.s
+.PHONY : data_read.cpp.s
 
 # Help Target
 help:
@@ -198,14 +158,10 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... 2Dpose_optimization"
-	@echo "... 3Dpose_optimization"
-	@echo "... 2Dpose_optimization.o"
-	@echo "... 2Dpose_optimization.i"
-	@echo "... 2Dpose_optimization.s"
-	@echo "... 3Dpose_optimization.o"
-	@echo "... 3Dpose_optimization.i"
-	@echo "... 3Dpose_optimization.s"
+	@echo "... read_data"
+	@echo "... data_read.o"
+	@echo "... data_read.i"
+	@echo "... data_read.s"
 .PHONY : help
 
 

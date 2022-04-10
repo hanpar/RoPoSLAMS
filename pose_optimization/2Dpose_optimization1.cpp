@@ -130,7 +130,9 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     for(int i = 1; i < imuMeasurements_SE3.size() - 1; i++){
         dt = (imuMeasurements_SE3.at(i).time - imuMeasurements_SE3.at(i-1).time) * pow(10, -9);
         current_angle =  (double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2)));
-
+        if (i == 1) {
+            cout << "current angle = " <<  current_angle << endl;
+        }
         current_vel_x = prev_vel_x + imuMeasurements_SE3.at(i).accel(0) * dt;
         current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
 

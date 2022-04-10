@@ -84,6 +84,17 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname);
   double average_delta_t;
 };
 
+struct GPS_DATA{
+  public:
+    long long int time;
+    int idx; 
+    double latitude;
+    double longitude;
+    double altitude;
+    Eigen::Matrix3d PositionCov; 
+};
 
+void fixGPSData(GPS_DATA &gps, string line, int &idx);
+bool loadGPSData(vector<GPS_DATA>& gps_measurements, string gps_data_file);
 //  #
 
