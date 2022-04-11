@@ -1,5 +1,5 @@
 #include "pose_optimization.h"
-#include </home/vishrut/ros_workspaces/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h>
+#include </home/boxi/Dev/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h>
 #include <cmath>
 
 using namespace std; 
@@ -13,18 +13,25 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     Values initial;
     
     // Add prior
-    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(2e-8,2e-8,2e-8)); 
+    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,2e-6,2e-6)); 
     graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 1.74), priorNoise));
+
+    int limit = imuMeasurements.size();
+     for(int i = 2; i < limit; i++){
+    	auto tempPose = slamPoses.at(i);
+        graph.add(PriorFactor<Pose2>(i, Pose2(tempPose.x,tempPose.y,tempPose.theta), priorNoise));
+    }   
+
     
     // Add vertices and edges
-    int limit = imuMeasurements.size();
+
     cout << "Imu measurement = " << limit << " GPS measurement = " << gt.size();
     cout << " SLAM measurement = " << slamPoses.size() << endl;
     
     //int limit = 100;
-    for (int i = 2; i < limit - 1; i++){ 
-    	EDGE_SE2 tempEdge = imuMeasurements.at(i);
-    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(2e-8,2e-8,2e-8)); 
+    for (int i = 2; i < limit; i++){ 
+    	EDGE_SE2 tempEdge = imuMeasurements.at(i-1);
+    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-3,1e-3,1e-4)); 
     	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
     }
     cout << "EDGES added " << endl;
