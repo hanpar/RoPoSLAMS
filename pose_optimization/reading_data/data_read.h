@@ -45,6 +45,8 @@ class VECTOR_SE2{
 
 void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line);
 bool read_se_3_data(vector<VECTOR_SE3> &vertices, string filname);
+void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int idx);
+bool read_se_3_data_new(vector<VECTOR_SE3> &vertices, string filname);
 
  struct EDGE_SE3 {
     public: 

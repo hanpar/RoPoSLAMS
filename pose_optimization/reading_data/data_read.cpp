@@ -105,6 +105,84 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_s
 
 }
 
+void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int idx){
+    int len;
+
+    len = line.find(" ");
+    //cout << line.substr(0, len) << endl;
+    vertex_se3.time = stoll(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    //Ignore the next 1 Columns
+    len = line.find(" ");
+    line = line.erase(0, len + 1);
+
+    vertex_se3.idx = idx++;
+
+    len = line.find(" ");
+    vertex_se3.x = stod(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    len = line.find(" ");
+    vertex_se3.y = stod(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    len = line.find(" ");
+    vertex_se3.z = stod(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    len = line.find(" ");
+    vertex_se3.q.x() = stod(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    len = line.find(" ");
+    vertex_se3.q.y() = stod(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    len = line.find(" ");
+    vertex_se3.q.z() = stod(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    len = line.find(" ");
+    vertex_se3.q.w() = stod(line.substr(0, len));
+    line = line.erase(0, len + 1);
+
+    vertex_se3.rotationMatrix = vertex_se3.q.normalized().toRotationMatrix();
+
+    get_se2_from_se3_data(vertex_se3, vertex_se2);
+}
+
+bool read_se_3_data_new(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_se2, string filname){
+
+    ifstream g2o_file(filname);
+    
+    if (!g2o_file.good()){
+        cout << "Invalid File\n";
+        return 0;
+    }
+    int len = 0;
+
+    VECTOR_SE3 vertex_se3;
+    VECTOR_SE2 vertex_se2;
+    int idx = 0;
+    
+    string line;
+
+    //Ignore 1st line
+    getline(g2o_file, line);
+
+    for(line; getline(g2o_file, line); )
+    {
+        read_vector_se3_data_new(vertex_se3, vertex_se2, line, idx);
+        vertices.push_back(vertex_se3);
+        vertices_se2.push_back(vertex_se2);
+        cout << idx << endl;
+    }
+    g2o_file.close();
+    return 1;
+
+}
+
 void fixKittiData(EDGE_SE3 &meas, string line, int &idx){
      int len; 
      double c0,c1,c2,c3,c4,c5,c6,c7,c8; 

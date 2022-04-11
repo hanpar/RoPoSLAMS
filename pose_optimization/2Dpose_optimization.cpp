@@ -26,7 +26,6 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     	EDGE_SE2 tempEdge = imuMeasurements.at(i);
     	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(2e-8,2e-8,2e-8)); 
     	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
-    	
     }
     cout << "EDGES added " << endl;
     vector<double> floam_x, floam_y;
@@ -88,6 +87,11 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     plt::title("Post Process");
     plt::legend();
     plt::save("result.png");
+    plt::figure(4);
+    plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+    plt::plot(gt_x,gt_y,{{"label", "Ground True"}});
+    plt::title("FLOAM vs Ground True");
+    plt::save("result_FLOAMvsGroundTrue.png");
     /*plt::figure(2);
     plt::plot(floam_x,floam_y,"-s");
     plt::title("Floam Initial");
@@ -229,7 +233,7 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "./data/floam_tf_kitti_2011_09_30_drive_0018.txt";
+    string slam_data = "./data/floam_tf_kitti_2011_09_30_drive_new.txt";
     
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
@@ -244,9 +248,10 @@ int main(const int argc, const char *argv[]) {
     vector<GROUND_TRUE> gt;
     string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
 
-    int i = 10; 
-    if (read_se_3_data(vertices, slamPoses, slam_data))
-    {
+    //int i = 10; 
+    if (read_se_3_data_new(vertices, slamPoses, slam_data))
+    {   
+        cout << "SLAM Poses Read Successfully!" << endl;
         // cout << vertices.at(i).q.x() << ", " << vertices.at(i).q.y() << ", " << vertices.at(i).q.z() << ", " << vertices.at(i).q.w() << endl;
         // cout << "IDX = " << vertices_se2.at(i).idx << ", Time = " << vertices_se2.at(i).time << ", X = " << vertices_se2.at(i).x << ", Y = " << vertices_se2.at(i).y << ", Theta = " << vertices_se2.at(i).theta << endl;
     }
