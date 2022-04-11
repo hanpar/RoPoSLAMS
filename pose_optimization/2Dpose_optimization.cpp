@@ -130,7 +130,7 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     //result.print(); 
 }
 
-void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements, vector<IMU_CORR> &imu_corr){
+void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements, vector<IMU_CORR> &imu_corr,vector<VECTOR_SE2> &slamPoses){
 
     double prev_vel_x = 4.8;
     double prev_vel_y = 0;
@@ -141,6 +141,9 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     double corr_x = 0;
     double corr_y = 0;
     double dt;
+    double dx = 0;
+    double dy = 0;
+    double dtheta = 0;
 
     EDGE_SE2 imuMeasurement;
     string output_filename = "IMU_integrate.txt";
@@ -151,36 +154,46 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     IMU_CORR imu;
     IMU_x.push_back(corr_x);
     IMU_y.push_back(corr_y);
-    int limit = imuMeasurements_SE3.size();
+    // int limit = imuMeasurements_SE3.size();
+    int limit = slamPoses.size();
     //int limit = 200;
-    for(int i = 1; i < limit; i++){
-        dt = (imuMeasurements_SE3.at(i).time - imuMeasurements_SE3.at(i-1).time) * pow(10, -9);
-        current_angle =  (double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2)));
-        if (i == 1) {
-            cout << "current angle = " <<  current_angle << endl;
+    int imuIdx = 1;
+
+    for(int i = 0; i < limit; i++){
+        while(slamPoses.at(i).time > imuMeasurements_SE3.at(imuIdx).time && imuIdx < imuMeasurements_SE3.size()){
+            dt = (imuMeasurements_SE3.at(imuIdx).time - imuMeasurements_SE3.at(imuIdx-1).time) * pow(10, -9);
+            current_angle =  (double) atan2(2 * (imuMeasurements_SE3.at(imuIdx).q.w() * imuMeasurements_SE3.at(imuIdx).q.z() + imuMeasurements_SE3.at(imuIdx).q.y() * imuMeasurements_SE3.at(imuIdx).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(imuIdx).q.x(), 2) + pow(imuMeasurements_SE3.at(imuIdx).q.z(), 2)));
+            if (imuIdx == 1) {
+                cout << "current angle = " <<  current_angle << endl;
+            }
+            current_vel_x = prev_vel_x + imuMeasurements_SE3.at(imuIdx).accel(0) * dt;
+            //current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
+            prev_vel_x = current_vel_x;
+            // prev_vel_y = current_vel_y;
+            dx += (current_vel_x + prev_vel_x) * 0.5 * dt;
+            dy = 0;
+            imuIdx++;
         }
         
-        current_vel_x = prev_vel_x + imuMeasurements_SE3.at(i).accel(0) * dt;
-        //current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
-        imuMeasurement.dx = (current_vel_x + prev_vel_x) * 0.5 * dt;// * cos(current_angle); - current_vel_y * dt * sin(current_angle);
-        imuMeasurement.dy = 0;//current_vel_x * dt// * sin(current_angle); //+ current_vel_y * dt * cos(current_angle);
+        imuMeasurement.dx = dx;// * cos(current_angle); - current_vel_y * dt * sin(current_angle);
+        imuMeasurement.dy = dy;//current_vel_x * dt// * sin(current_angle); //+ current_vel_y * dt * cos(current_angle);
         
         imuMeasurement.dtheta =  current_angle - prev_angle;//(double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2))) * dt;
-        imuMeasurement.time = imuMeasurements_SE3.at(i).time;
-        imuMeasurement.idx = imuMeasurements_SE3.at(i).idx;
+        imuMeasurement.time = imuMeasurements_SE3.at(imuIdx).time;
+        imuMeasurement.idx = imuMeasurements_SE3.at(imuIdx).idx;
+        prev_angle = current_angle;
 
         // cout << "dx = " << imuMeasurement.dx << " dy = " << imuMeasurement.dy << " dtheta = " << imuMeasurement.dtheta <<endl;
 
         imuMeasurements.push_back(imuMeasurement);
-        prev_angle = current_angle;
+        
         fprintf(fp_out, "%d, %f, %f, %f, %f\n",
                     imuMeasurement.idx, dt, imuMeasurement.dx, imuMeasurement.dy, imuMeasurement.dtheta);
         corr_x = corr_x + (current_vel_x + prev_vel_x) * 0.5 * dt * cos(current_angle);
         corr_y = corr_y + (current_vel_x + prev_vel_x) * 0.5 * dt * sin(current_angle);
         IMU_x.push_back(corr_x);
         IMU_y.push_back(corr_y);
-        prev_vel_x = current_vel_x;
-        prev_vel_y = current_vel_y;
+        
         imu.IMU_x = corr_x;
         imu.IMU_y = corr_y;
         imu_corr.push_back(imu);
@@ -265,7 +278,7 @@ int main(const int argc, const char *argv[]) {
     else exit(1);
 
     Calculate_GroundTrue(GPSMeasurements, gt);
-    integrateIMUData(imuMeasurements_SE3, imuMeasurements, IMU_corr);
+    integrateIMUData(imuMeasurements_SE3, imuMeasurements, IMU_corr, slamPoses);
     cout << "Inetegrated IMU" <<endl;
     runBatch(slamPoses, imuMeasurements, gt, IMU_corr);
 
