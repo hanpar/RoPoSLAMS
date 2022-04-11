@@ -1,5 +1,5 @@
 #include "pose_optimization.h"
-#include </mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h>
+#include </home/vishrut/ros_workspaces/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h>
 #include <cmath>
 
 using namespace std; 
@@ -181,7 +181,7 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
         
         imuMeasurement.dx = dx;// * cos(current_angle); - current_vel_y * dt * sin(current_angle);
         imuMeasurement.dy = dy;//current_vel_x * dt// * sin(current_angle); //+ current_vel_y * dt * cos(current_angle);
-        
+        dx = 0;
         imuMeasurement.dtheta =  current_angle - prev_angle;//(double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2))) * dt;
         imuMeasurement.time = imuMeasurements_SE3.at(imuIdx).time;
         imuMeasurement.idx = imuMeasurements_SE3.at(imuIdx).idx;
