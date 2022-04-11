@@ -164,7 +164,7 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     int imuIdx = 1;
 
     for(int i = 0; i < limit; i++){
-        while(slamPoses.at(i).time > imuMeasurements_SE3.at(imuIdx).time && imuIdx < imuMeasurements_SE3.size()){
+        while(slamPoses.at(i).time >= imuMeasurements_SE3.at(imuIdx).time && imuIdx < imuMeasurements_SE3.size()){
             dt = (imuMeasurements_SE3.at(imuIdx).time - imuMeasurements_SE3.at(imuIdx-1).time) * pow(10, -9);
             current_angle =  (double) atan2(2 * (imuMeasurements_SE3.at(imuIdx).q.w() * imuMeasurements_SE3.at(imuIdx).q.z() + imuMeasurements_SE3.at(imuIdx).q.y() * imuMeasurements_SE3.at(imuIdx).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(imuIdx).q.x(), 2) + pow(imuMeasurements_SE3.at(imuIdx).q.z(), 2)));
             if (imuIdx == 1) {
