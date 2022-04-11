@@ -1,5 +1,5 @@
 #include "pose_optimization.h"
-#include </home/boxi/Dev/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h>
+#include </home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h>
 #include <cmath>
 
 using namespace std; 
@@ -11,42 +11,62 @@ namespace plt = matplotlibcpp;
 void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, vector<GROUND_TRUE> gt, vector<IMU_CORR> imu_corr){
     NonlinearFactorGraph graph;
     Values initial;
-    
-    // Add prior
-    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,2e-6,2e-6)); 
-    graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 1.74), priorNoise));
 
-    int limit = imuMeasurements.size();
-     for(int i = 2; i < limit; i++){
-    	auto tempPose = slamPoses.at(i);
-        graph.add(PriorFactor<Pose2>(i, Pose2(tempPose.x,tempPose.y,tempPose.theta), priorNoise));
-    }   
-
-    
-    // Add vertices and edges
-
-    cout << "Imu measurement = " << limit << " GPS measurement = " << gt.size();
+    cout << "Imu measurement = " << imuMeasurements.size() << " GPS measurement = " << gt.size();
     cout << " SLAM measurement = " << slamPoses.size() << endl;
     
-    //int limit = 100;
-    for (int i = 2; i < limit; i++){ 
-    	EDGE_SE2 tempEdge = imuMeasurements.at(i-1);
-        double num_integration = (imuMeasurements.at(i-1).time - imuMeasurements.at(i-2).time) / 0.1;
-        // The more numbers of integrations, the higher covariance value
-    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-3 * num_integration,1e-3 * num_integration,1e-4 * num_integration)); 
-    	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
-    }
-    cout << "EDGES added " << endl;
+    // Add prior
+    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-6)); 
+    graph.add(PriorFactor<Pose2>(0, Pose2(0.0, 0.0, 0.0), priorNoise));
+
     vector<double> floam_x, floam_y;
-    limit = slamPoses.size();
+    int limit = slamPoses.size();
     // limit = 50;
-    for(int i = 1; i < limit; i++){
+    for(int i = 0; i < limit; i++){
     	auto tempPose = slamPoses.at(i);
-    	initial.insert(i, Pose2(tempPose.x,tempPose.y,tempPose.theta));
+        // cout << tempPose.idx << endl;
+    	initial.insert(tempPose.idx, Pose2(tempPose.x,tempPose.y,tempPose.theta));
         floam_x.push_back(tempPose.x);
         floam_y.push_back(tempPose.y);
     }
-    cout << "Poses added " << endl;
+    cout << "Poses added! Last Pose idx = " << slamPoses.at(limit-1).idx <<  endl;
+    
+    limit = gt.size();
+    int slamIdx = 0;
+    for(int i = 0; i < limit; i++){
+        auto gpsPose = gt.at(i);
+        if(slamPoses.at(slamIdx).time <= gpsPose.time){
+            // cout << slamIdx;
+            graph.add(PriorFactor<Pose2>(slamPoses.at(slamIdx).idx, Pose2(gpsPose.gt_x, gpsPose.gt_y, slamPoses.at(slamIdx).theta), priorNoise));
+            slamIdx++;
+            // break;
+        }
+    	// cout << tempPose.idx << endl;
+        // graph.add(PriorFactor<Pose2>(i, Pose2(gpsPose.x, gpsPose.y, gpsPose.theta), priorNoise));
+    	// initial.insert(tempPose.idx, Pose2(tempPose.x,tempPose.y,tempPose.theta));
+        // floam_x.push_back(tempPose.x);
+        // floam_y.push_back(tempPose.y);
+    }
+    cout << "GPS priors added! Last Prior idx = " << slamIdx-1<<  endl;
+    
+    //  for(int i = 2; i < limit; i++){
+    // 	auto tempPose = slamPoses.at(i);
+    //     graph.add(PriorFactor<Pose2>(i, Pose2(tempPose.x,tempPose.y,tempPose.theta), priorNoise));
+    // }   
+    
+    limit = imuMeasurements.size();
+    for (int i = 1; i < limit; i++){ 
+    	EDGE_SE2 tempEdge = imuMeasurements.at(i);
+        double num_integration = (imuMeasurements.at(i).time - imuMeasurements.at(i-1).time) / 0.1;
+        // cout << num_integration << endl;
+        // break;
+        // The more numbers of integrations, the higher covariance value
+    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-3 * num_integration, 1e-3 * num_integration, 1e-4 * num_integration)); 
+    	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
+    }
+
+    cout << "EDGES added! Last Pose idx = " << imuMeasurements.at(limit-1).idx << endl;
+
     GaussNewtonParams parameters; 
     parameters.relativeErrorTol = 1e-4; 
     parameters.maxIterations = 10000; 
@@ -192,7 +212,7 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
         dx = 0;
         imuMeasurement.dtheta =  current_angle - prev_angle;//(double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2))) * dt;
         imuMeasurement.time = imuMeasurements_SE3.at(imuIdx).time;
-        imuMeasurement.idx = imuMeasurements_SE3.at(imuIdx).idx;
+        imuMeasurement.idx = i;
         prev_angle = current_angle;
 
         // cout << "dx = " << imuMeasurement.dx << " dy = " << imuMeasurement.dy << " dtheta = " << imuMeasurement.dtheta <<endl;
@@ -209,9 +229,9 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
         imu.IMU_x = corr_x;
         imu.IMU_y = corr_y;
         imu_corr.push_back(imu);
-        dx = 0;
     }
-    cout << "IMU Mesurement size" << imuMeasurements_SE3.size() << endl;
+    // cout << "In IMU Integrate \n";
+    // cout << "IMU Mesurement size = " << imuMeasurements.size() << " SLAM Measurement Size = " << slamPoses.size() << endl;
     plt::figure(2);
     plt::plot(IMU_x,IMU_y);
     plt::title("IMU Trajectory");
@@ -231,6 +251,8 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
             pre_x = gpsMeasurements.at(i).longitude;
             pre_y = gpsMeasurements.at(i).latitude;
             pre_z = gpsMeasurements.at(i).altitude;
+            gt_point.time = gpsMeasurements.at(i).time;
+            gt_point.idx = gpsMeasurements.at(i).idx;
             gt_point.gt_x = 0;
             gt_point.gt_y = 0;
             gt_point.gt_z = 0;
@@ -241,6 +263,8 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
             gt_point.gt_x = (gpsMeasurements.at(i).longitude - pre_x) * 72880;
             gt_point.gt_y = (gpsMeasurements.at(i).latitude - pre_y) * 111111;
             gt_point.gt_z = gpsMeasurements.at(i).altitude - pre_z;
+            gt_point.time = gpsMeasurements.at(i).time;
+            gt_point.idx = gpsMeasurements.at(i).idx;
         }
         gt.push_back(gt_point);
         x.push_back(gt_point.gt_x);
@@ -255,21 +279,21 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    //string slam_data = "./data/floam_tf_kitti_2011_09_30_drive_0018.txt";
-    string slam_data = "./data/ground_truth_kitti_2011_09_30_drive_0018.txt";
+    // string slam_data = "../data/aloam_kitti_0018.txt";
+    string slam_data = "../data/ground_truth_kitti_2011_09_30_drive_0018.txt";
 
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
     vector<IMU_CORR> IMU_corr;
        
-    string imu_data = "./data/imu_kitti_2011_09_30_drive_0018.txt";
+    string imu_data = "../data/imu_kitti_2011_09_30_drive_0018.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "../data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
     vector<GPS_DATA> GPSMeasurements;
     vector<GROUND_TRUE> gt;
-    string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
+    string gps_data = "../data/gps_kitti_2011_09_30_drive_0018.txt";
 
     //int i = 10; 
     if (read_se_3_data(vertices, slamPoses, slam_data))
@@ -294,7 +318,6 @@ int main(const int argc, const char *argv[]) {
 
     Calculate_GroundTrue(GPSMeasurements, gt);
     integrateIMUData(imuMeasurements_SE3, imuMeasurements, IMU_corr, slamPoses);
-    cout << "Inetegrated IMU" <<endl;
     runBatch(slamPoses, imuMeasurements, gt, IMU_corr);
 
 

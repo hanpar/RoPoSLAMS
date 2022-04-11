@@ -15,7 +15,7 @@ void get_se2_from_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2){
     // vertex_se2.theta = euler_angles[2];
 
 }
-void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int idx){
+void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int &idx){
     int len;
 
     //Ignore 1st 3 Columns
@@ -104,7 +104,7 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_s
 
 }
 
-void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int idx){
+void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int &idx){
     int len;
 
     //Ignore the next 1 Columns
@@ -160,7 +160,7 @@ bool read_se_3_data_new(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertic
     ifstream g2o_file(filname);
     
     if (!g2o_file.good()){
-        cout << "Invalid File\n";
+        cout << "Invalid File SLAM\n";
         return 0;
     }
     int len = 0;
@@ -170,7 +170,6 @@ bool read_se_3_data_new(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertic
     int idx = 0;
     
     string line;
-
     //Ignore 1st line
     getline(g2o_file, line);
 
@@ -339,7 +338,7 @@ void fixKittiData(EDGE_SE3 &meas, string line, int &idx){
         return 0; 
     } 
 
-    printf("Reading IMU Metadata\n");
+    // printf("Reading IMU Metadata\n");
 
     getline(imu_metadata, line, '\n');  // ignore the first line
 

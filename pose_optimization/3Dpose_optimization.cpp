@@ -140,7 +140,6 @@ int main(const int argc, const char *argv[]) {
     else exit(1);
 
     //integrateIMUData(imuMeasurements_SE3, imuMeasurements);
-    cout << "Inetegrated IMU" <<endl;
     runBatch(vertices, imuMeasurements_SE3); 
 }
     
