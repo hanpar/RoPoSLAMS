@@ -31,7 +31,9 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     //int limit = 100;
     for (int i = 2; i < limit; i++){ 
     	EDGE_SE2 tempEdge = imuMeasurements.at(i-1);
-    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-3,1e-3,1e-4)); 
+        double num_integration = (imuMeasurements.at(i-1).time - imuMeasurements.at(i-2).time) / 0.1;
+        // The more numbers of integrations, the higher covariance value
+    	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-3 * num_integration,1e-3 * num_integration,1e-4 * num_integration)); 
     	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
     }
     cout << "EDGES added " << endl;
@@ -169,7 +171,6 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     int limit = slamPoses.size();
     //int limit = 200;
     int imuIdx = 1;
-
     for(int i = 0; i < limit - 1; i++){
         while(slamPoses.at(i).time >= imuMeasurements_SE3.at(imuIdx).time && imuIdx < imuMeasurements_SE3.size()){
             dt = (imuMeasurements_SE3.at(imuIdx).time - imuMeasurements_SE3.at(imuIdx-1).time) * pow(10, -9);
