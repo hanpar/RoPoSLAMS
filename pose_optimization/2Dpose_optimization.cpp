@@ -143,7 +143,7 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
 
 void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements, vector<IMU_CORR> &imu_corr,vector<VECTOR_SE2> &slamPoses){
 
-    double prev_vel_x = 4.8;
+    double prev_vel_x = 5.4;
     double prev_vel_y = 0;
     double prev_angle = 1.74;
     double current_angle = 0;
