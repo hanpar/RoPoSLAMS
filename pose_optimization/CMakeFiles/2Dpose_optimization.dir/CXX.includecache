@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/2Dpose_optimization.cpp
+/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/2Dpose_optimization1.cpp
 pose_optimization.h
 /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/pose_optimization.h
-/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h
--
+reading_data/matplotlib-cpp/matplotlibcpp.h
+/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h
 cmath
 -
 
@@ -80,7 +80,7 @@ gtsam/slam/PriorFactor.h
 gtsam/slam/dataset.h
 -
 
-/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h
+/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h
 Python.h
 -
 vector

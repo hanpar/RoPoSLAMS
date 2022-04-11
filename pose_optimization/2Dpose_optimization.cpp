@@ -1,5 +1,5 @@
 #include "pose_optimization.h"
-#include </home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h>
+#include "reading_data/matplotlib-cpp/matplotlibcpp.h"
 #include <cmath>
 
 using namespace std; 
@@ -280,20 +280,20 @@ int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
     // string slam_data = "../data/aloam_kitti_0018.txt";
-    string slam_data = "../data/ground_truth_kitti_2011_09_30_drive_0018.txt";
+    string slam_data = "./data/ground_truth_kitti_2011_09_30_drive_0018.txt";
 
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
     vector<IMU_CORR> IMU_corr;
        
-    string imu_data = "../data/imu_kitti_2011_09_30_drive_0018.txt";
+    string imu_data = "./data/imu_kitti_2011_09_30_drive_0018.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "../data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
     vector<GPS_DATA> GPSMeasurements;
     vector<GROUND_TRUE> gt;
-    string gps_data = "../data/gps_kitti_2011_09_30_drive_0018.txt";
+    string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
 
     //int i = 10; 
     if (read_se_3_data(vertices, slamPoses, slam_data))
