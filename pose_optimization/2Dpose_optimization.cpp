@@ -163,7 +163,7 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     //int limit = 200;
     int imuIdx = 1;
 
-    for(int i = 0; i < limit; i++){
+    for(int i = 0; i < limit - 1; i++){
         while(slamPoses.at(i).time >= imuMeasurements_SE3.at(imuIdx).time && imuIdx < imuMeasurements_SE3.size()){
             dt = (imuMeasurements_SE3.at(imuIdx).time - imuMeasurements_SE3.at(imuIdx-1).time) * pow(10, -9);
             current_angle =  (double) atan2(2 * (imuMeasurements_SE3.at(imuIdx).q.w() * imuMeasurements_SE3.at(imuIdx).q.z() + imuMeasurements_SE3.at(imuIdx).q.y() * imuMeasurements_SE3.at(imuIdx).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(imuIdx).q.x(), 2) + pow(imuMeasurements_SE3.at(imuIdx).q.z(), 2)));
@@ -172,11 +172,11 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
             }
             current_vel_x = prev_vel_x + imuMeasurements_SE3.at(imuIdx).accel(0) * dt;
             //current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
-            prev_vel_x = current_vel_x;
             // prev_vel_y = current_vel_y;
             dx += (current_vel_x + prev_vel_x) * 0.5 * dt;
             dy = 0;
             imuIdx++;
+            prev_vel_x = current_vel_x;
         }
         
         imuMeasurement.dx = dx;// * cos(current_angle); - current_vel_y * dt * sin(current_angle);
@@ -201,6 +201,7 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
         imu.IMU_x = corr_x;
         imu.IMU_y = corr_y;
         imu_corr.push_back(imu);
+        dx = 0;
     }
     cout << "IMU Mesurement size" << imuMeasurements_SE3.size() << endl;
     plt::figure(2);
@@ -246,8 +247,9 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "./data/floam_tf_kitti_2011_09_30_drive_new.txt";
-    
+    //string slam_data = "./data/floam_tf_kitti_2011_09_30_drive_0018.txt";
+    string slam_data = "./data/ground_truth_kitti_2011_09_30_drive_0018.txt";
+
     vector<EDGE_SE3> imuMeasurements_SE3;
     vector<EDGE_SE2> imuMeasurements;
     vector<IMU_CORR> IMU_corr;
@@ -262,7 +264,7 @@ int main(const int argc, const char *argv[]) {
     string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
 
     //int i = 10; 
-    if (read_se_3_data_new(vertices, slamPoses, slam_data))
+    if (read_se_3_data(vertices, slamPoses, slam_data))
     {   
         cout << "SLAM Poses Read Successfully!" << endl;
         // cout << vertices.at(i).q.x() << ", " << vertices.at(i).q.y() << ", " << vertices.at(i).q.z() << ", " << vertices.at(i).q.w() << endl;
