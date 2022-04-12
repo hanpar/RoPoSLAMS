@@ -112,18 +112,20 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements,  v
     }
     fclose(fp_out);
     plt::figure(1);
-    plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+    // plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
     plt::plot(post_x,post_y,{{"label", "Batch Result"}});
     plt::plot(imu_x,imu_y,{{"label", "IMU"}});
     plt::plot(gt_x,gt_y,{{"label", "Ground Truth"}});
-    plt::title("FLOAM Post Process with IMU");
+    plt::title("Post Processing on F-LOAM Poses using IMU");
+    plt::xlabel("X");
+    plt::ylabel("Y");
     plt::legend();
     plt::save("FLOAM_Post_Process_result.png");
     plt::figure(4);
-    plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
-    plt::plot(post_x,post_y,{{"label", "Batch Result"}});
-    plt::title("FLOAM vs Batch");
-    plt::save("result_FLOAMvsBatch.png");
+    // plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+    // plt::plot(post_x,post_y,{{"label", "Batch Result"}});
+    // plt::title("FLOAM vs Batch");
+    // plt::save("result_FLOAMvsBatch.png");
     /*plt::figure(2);
     plt::plot(floam_x,floam_y,"-s");
     plt::title("Floam Initial");
