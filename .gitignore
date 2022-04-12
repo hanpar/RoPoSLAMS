@@ -1,8 +1,0 @@
-build/
-devel/
-gtsam-demo/build/
-.vscode/
-reading_data/a.out
-reading_data/read_tf
-reading_data/data/.ipynb_checkpoints/
-reading_data/old_data
