@@ -7,12 +7,11 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
 
     cout << "Imu measurement = " << imuMeasurements.size() << " GPS measurement = " << gt.size();
     cout << " SLAM measurement = " << slamPoses.size() << endl;
-    
-    // Add prior
-    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-2, 1e-2, 1e-2)); 
 
     vector<double> floam_x, floam_y;
     if (!useSLAM){
+        // Add prior
+         noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-2, 1e-2, 1e-2)); 
         int limit = slamPoses.size();
         for(int i = 0; i < limit; i++){
             auto tempPose = slamPoses.at(i);
@@ -37,6 +36,8 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     }
     else
     {
+        // Add prior
+         noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-2, 1e-2, 1e-2)); 
         int limit = slamPoses.size();
         // limit = 50;
         for(int i = 0; i < limit; i++){

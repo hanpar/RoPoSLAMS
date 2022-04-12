@@ -300,8 +300,9 @@ int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE2> GT_SE2;
     string gt_data = "./data/floam_tf_kitti_2011_09_30_drive_notsync.txt";
 
-    //int i = 10; 
-    if (read_se_3_data_new(vertices, slamPoses, slam_data))
+     bool useALOAMCorrection = false;
+
+    if (read_se_3_data_new(vertices, slamPoses, slam_data, useALOAMCorrection))
     {   
         cout << "SLAM Poses Read Successfully! " << slamPoses.size() <<endl;
         // cout << vertices.at(i).q.x() << ", " << vertices.at(i).q.y() << ", " << vertices.at(i).q.z() << ", " << vertices.at(i).q.w() << endl;

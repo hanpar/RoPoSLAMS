@@ -113,17 +113,10 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_s
 void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int &idx, bool useALOAMCorrection){
     int len;
 
-    //Ignore the next 1 Columns
-    len = line.find(" ");
-    line = line.erase(0, len + 1);
 
     len = line.find(" ");
     //cout << line.substr(0, len) << endl;
     vertex_se3.time = stoll(line.substr(0, len));
-    line = line.erase(0, len + 1);
-
-    //Ignore the next 1 Columns
-    len = line.find(" ");
     line = line.erase(0, len + 1);
 
     vertex_se3.idx = idx++;
