@@ -123,8 +123,10 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     plt::plot(post_x,post_y,{{"label", "Batch Result"}});
     // plt::plot(post_x, post_y, "-o");
     plt::title("Post Processing on GPS Poses using IMU");
+    plt::xlabel("X");
+    plt::ylabel("Y");
     plt::legend();
-    // plt::save("result_with_gps_and_imu.png");
+    plt::save("result_with_gps_and_imu.png");
     // plt::figure(4);
     // plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
     // plt::plot(gt_x,gt_y,{{"label", "Ground True"}});
@@ -368,6 +370,7 @@ int main(const int argc, const char *argv[]) {
 
     //SLAM Data File
     string slam_data = "../data/aloam_kitti_0018.txt";
+    // string slam_data = "../data/aloam_kitti_0028.txt";
     // string slam_data = "../data/ground_truth_kitti_2011_09_30_drive_0018.txt";
 
     vector<EDGE_SE3> imuMeasurements_SE3;
@@ -376,14 +379,16 @@ int main(const int argc, const char *argv[]) {
        
     //IMU Data File
     string imu_data = "../data/imu_kitti_2011_09_30_drive_0018.txt";
+    // string imu_data = "../data/imu_kitti_2011_09_30_drive_0028_synced.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "../data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
     //GPS Data File
     vector<GPS_DATA> GPSMeasurements;
     vector<GROUND_TRUE> gt;
-    string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
+    string gps_data = "../data/gps_kitti_2011_09_30_drive_0018.txt";
+    // string gps_data = "../data"
 
     bool useALOAMCorrection = true;
 
