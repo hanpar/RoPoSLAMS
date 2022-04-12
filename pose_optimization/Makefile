@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs56
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -111,44 +111,84 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named 2Dpose_optimization
+# Target rules for targets named 2Dpose_optimization_FLOAM
 
 # Build rule for target.
-2Dpose_optimization: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 2Dpose_optimization
-.PHONY : 2Dpose_optimization
+2Dpose_optimization_FLOAM: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 2Dpose_optimization_FLOAM
+.PHONY : 2Dpose_optimization_FLOAM
 
 # fast build rule for target.
-2Dpose_optimization/fast:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/build
-.PHONY : 2Dpose_optimization/fast
+2Dpose_optimization_FLOAM/fast:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_FLOAM.dir/build.make CMakeFiles/2Dpose_optimization_FLOAM.dir/build
+.PHONY : 2Dpose_optimization_FLOAM/fast
 
-2Dpose_optimization1.o: 2Dpose_optimization1.cpp.o
+#=============================================================================
+# Target rules for targets named 2Dpose_optimization_ALOAM
 
-.PHONY : 2Dpose_optimization1.o
+# Build rule for target.
+2Dpose_optimization_ALOAM: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 2Dpose_optimization_ALOAM
+.PHONY : 2Dpose_optimization_ALOAM
+
+# fast build rule for target.
+2Dpose_optimization_ALOAM/fast:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_ALOAM.dir/build.make CMakeFiles/2Dpose_optimization_ALOAM.dir/build
+.PHONY : 2Dpose_optimization_ALOAM/fast
+
+2Dpose_optimization.o: 2Dpose_optimization.cpp.o
+
+.PHONY : 2Dpose_optimization.o
 
 # target to build an object file
-2Dpose_optimization1.cpp.o:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization1.cpp.o
-.PHONY : 2Dpose_optimization1.cpp.o
+2Dpose_optimization.cpp.o:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_ALOAM.dir/build.make CMakeFiles/2Dpose_optimization_ALOAM.dir/2Dpose_optimization.cpp.o
+.PHONY : 2Dpose_optimization.cpp.o
 
-2Dpose_optimization1.i: 2Dpose_optimization1.cpp.i
+2Dpose_optimization.i: 2Dpose_optimization.cpp.i
 
-.PHONY : 2Dpose_optimization1.i
+.PHONY : 2Dpose_optimization.i
 
 # target to preprocess a source file
-2Dpose_optimization1.cpp.i:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization1.cpp.i
-.PHONY : 2Dpose_optimization1.cpp.i
+2Dpose_optimization.cpp.i:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_ALOAM.dir/build.make CMakeFiles/2Dpose_optimization_ALOAM.dir/2Dpose_optimization.cpp.i
+.PHONY : 2Dpose_optimization.cpp.i
 
-2Dpose_optimization1.s: 2Dpose_optimization1.cpp.s
+2Dpose_optimization.s: 2Dpose_optimization.cpp.s
 
-.PHONY : 2Dpose_optimization1.s
+.PHONY : 2Dpose_optimization.s
 
 # target to generate assembly for a file
-2Dpose_optimization1.cpp.s:
-	$(MAKE) -f CMakeFiles/2Dpose_optimization.dir/build.make CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization1.cpp.s
-.PHONY : 2Dpose_optimization1.cpp.s
+2Dpose_optimization.cpp.s:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_ALOAM.dir/build.make CMakeFiles/2Dpose_optimization_ALOAM.dir/2Dpose_optimization.cpp.s
+.PHONY : 2Dpose_optimization.cpp.s
+
+2Dpose_optimization_notsync.o: 2Dpose_optimization_notsync.cpp.o
+
+.PHONY : 2Dpose_optimization_notsync.o
+
+# target to build an object file
+2Dpose_optimization_notsync.cpp.o:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_FLOAM.dir/build.make CMakeFiles/2Dpose_optimization_FLOAM.dir/2Dpose_optimization_notsync.cpp.o
+.PHONY : 2Dpose_optimization_notsync.cpp.o
+
+2Dpose_optimization_notsync.i: 2Dpose_optimization_notsync.cpp.i
+
+.PHONY : 2Dpose_optimization_notsync.i
+
+# target to preprocess a source file
+2Dpose_optimization_notsync.cpp.i:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_FLOAM.dir/build.make CMakeFiles/2Dpose_optimization_FLOAM.dir/2Dpose_optimization_notsync.cpp.i
+.PHONY : 2Dpose_optimization_notsync.cpp.i
+
+2Dpose_optimization_notsync.s: 2Dpose_optimization_notsync.cpp.s
+
+.PHONY : 2Dpose_optimization_notsync.s
+
+# target to generate assembly for a file
+2Dpose_optimization_notsync.cpp.s:
+	$(MAKE) -f CMakeFiles/2Dpose_optimization_FLOAM.dir/build.make CMakeFiles/2Dpose_optimization_FLOAM.dir/2Dpose_optimization_notsync.cpp.s
+.PHONY : 2Dpose_optimization_notsync.cpp.s
 
 # Help Target
 help:
@@ -156,12 +196,16 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... 2Dpose_optimization"
-	@echo "... 2Dpose_optimization1.o"
-	@echo "... 2Dpose_optimization1.i"
-	@echo "... 2Dpose_optimization1.s"
+	@echo "... 2Dpose_optimization_FLOAM"
+	@echo "... rebuild_cache"
+	@echo "... 2Dpose_optimization_ALOAM"
+	@echo "... 2Dpose_optimization.o"
+	@echo "... 2Dpose_optimization.i"
+	@echo "... 2Dpose_optimization.s"
+	@echo "... 2Dpose_optimization_notsync.o"
+	@echo "... 2Dpose_optimization_notsync.i"
+	@echo "... 2Dpose_optimization_notsync.s"
 .PHONY : help
 
 
