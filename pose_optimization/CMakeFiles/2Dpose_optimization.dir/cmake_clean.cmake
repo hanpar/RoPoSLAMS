@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "2Dpose_optimization"
   "2Dpose_optimization.pdb"
-  "CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization.cpp.o"
+  "CMakeFiles/2Dpose_optimization.dir/2Dpose_optimization1.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

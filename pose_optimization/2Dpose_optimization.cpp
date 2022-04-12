@@ -377,12 +377,12 @@ int main(const int argc, const char *argv[]) {
     string imu_data = "../data/imu_kitti_2011_09_30_drive_0018.txt";
 
     KittiCalibration kittiCalibration;
-    string imu_metadata = "../data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
+    string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
     //GPS Data File
     vector<GPS_DATA> GPSMeasurements;
     vector<GROUND_TRUE> gt;
-    string gps_data = "../data/gps_kitti_2011_09_30_drive_0018.txt";
+    string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
 
     bool useALOAMCorrection = true;
 
