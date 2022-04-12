@@ -1,3 +1,0 @@
-/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/CMakeFiles/rebuild_cache.dir
-/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/CMakeFiles/edit_cache.dir
-/mnt/c/Users/adam8/Desktop/Umich/Course/ROB530/Project/eecs568-group17-project/pose_optimization/CMakeFiles/2Dpose_optimization.dir

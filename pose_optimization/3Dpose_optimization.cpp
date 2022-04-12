@@ -1,5 +1,5 @@
 #include "pose_optimization.h"
-#include </home/vishrut/ros_workspaces/eecs568-group17-project/reading_data/matplotlib-cpp/matplotlibcpp.h>
+
 
 using namespace std; 
 using namespace gtsam; 

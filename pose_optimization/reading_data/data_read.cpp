@@ -1,12 +1,18 @@
 #include "data_read.h"
 
 
-void get_se2_from_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2){
+void get_se2_from_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, bool useALOAMCorrection){
     vertex_se2.time = vertex_se3.time;
     vertex_se2.idx = vertex_se3.idx;    
     vertex_se2.x = vertex_se3.x;
     vertex_se2.y = vertex_se3.y;
 
+    if (useALOAMCorrection){
+        double theta = 3.14/2 + 0.159; 
+        vertex_se2.x = vertex_se3.x * cos(theta) - vertex_se3.y * sin(theta);
+        vertex_se2.y = vertex_se3.y * cos(theta) + vertex_se3.x * sin(theta);  
+    }
+     
     // auto y = (double) atan2(2 * (q.w() * q.y() + q.x() * q.z()), 1 - 2 * (pow(q.y(), 2) + pow(q.x(), 2)));
     // auto x = (double) asin(2 * (q.w() * q.x() - q.z() * q.y()));
     vertex_se2.theta = (double) atan2(2 * (vertex_se3.q.w() * vertex_se3.q.z() + vertex_se3.q.y() * vertex_se3.q.x()), 1 - 2 * (pow(vertex_se3.q.x(), 2) + pow(vertex_se3.q.z(), 2)));
@@ -15,7 +21,7 @@ void get_se2_from_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2){
     // vertex_se2.theta = euler_angles[2];
 
 }
-void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int &idx){
+void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int &idx, bool useALOAMCorrection){
     int len;
 
     //Ignore 1st 3 Columns
@@ -69,11 +75,11 @@ void read_vector_se3_data(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string
 
     vertex_se3.rotationMatrix = vertex_se3.q.normalized().toRotationMatrix();
 
-    get_se2_from_se3_data(vertex_se3, vertex_se2);
+    get_se2_from_se3_data(vertex_se3, vertex_se2, useALOAMCorrection);
 
 }
 
-bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_se2, string filname){
+bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_se2, string filname, bool useALOAMCorrection){
 
     ifstream g2o_file(filname);
     
@@ -94,7 +100,7 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_s
 
     for(line; getline(g2o_file, line); )
     {
-        read_vector_se3_data(vertex_se3, vertex_se2, line, idx);
+        read_vector_se3_data(vertex_se3, vertex_se2, line, idx, useALOAMCorrection);
         vertices.push_back(vertex_se3);
         vertices_se2.push_back(vertex_se2);
     }
@@ -104,20 +110,13 @@ bool read_se_3_data(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_s
 
 }
 
-void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int &idx){
+void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, string line, int &idx, bool useALOAMCorrection){
     int len;
 
-    //Ignore the next 1 Columns
-    len = line.find(" ");
-    line = line.erase(0, len + 1);
 
     len = line.find(" ");
     //cout << line.substr(0, len) << endl;
     vertex_se3.time = stoll(line.substr(0, len));
-    line = line.erase(0, len + 1);
-
-    //Ignore the next 1 Columns
-    len = line.find(" ");
     line = line.erase(0, len + 1);
 
     vertex_se3.idx = idx++;
@@ -152,10 +151,10 @@ void read_vector_se3_data_new(VECTOR_SE3 &vertex_se3, VECTOR_SE2 &vertex_se2, st
 
     vertex_se3.rotationMatrix = vertex_se3.q.normalized().toRotationMatrix();
 
-    get_se2_from_se3_data(vertex_se3, vertex_se2);
+    get_se2_from_se3_data(vertex_se3, vertex_se2, useALOAMCorrection);
 }
 
-bool read_se_3_data_new(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_se2, string filname){
+bool read_se_3_data_new(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertices_se2, string filname, bool useALOAMCorrection){
 
     ifstream g2o_file(filname);
     
@@ -175,7 +174,7 @@ bool read_se_3_data_new(vector<VECTOR_SE3> &vertices, vector<VECTOR_SE2> &vertic
 
     for(line; getline(g2o_file, line); )
     {
-        read_vector_se3_data_new(vertex_se3, vertex_se2, line, idx);
+        read_vector_se3_data_new(vertex_se3, vertex_se2, line, idx, useALOAMCorrection);
         vertices.push_back(vertex_se3);
         vertices_se2.push_back(vertex_se2);
         //cout << idx << endl;

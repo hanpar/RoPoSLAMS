@@ -8,57 +8,76 @@ using namespace Eigen;
 
 namespace plt = matplotlibcpp;
 
-void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, vector<GROUND_TRUE> gt, vector<IMU_CORR> imu_corr){
+void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements,  vector<VECTOR_SE2> gt, vector<IMU_CORR> imu_corr){
     NonlinearFactorGraph graph;
     Values initial;
+
+    cout << "Imu measurement = " << imuMeasurements.size() << " GPS measurement = " << gt.size();
+    cout << " SLAM measurement = " << slamPoses.size() << endl;
     
     // Add prior
-    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(2e-8,2e-8,2e-8)); 
-    graph.add(PriorFactor<Pose2>(1, Pose2(0, 0, 1.74), priorNoise));
+    noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-6,1e-6,1e-6)); 
+    graph.add(PriorFactor<Pose2>(0, Pose2(0.0, 0.0, 0.0), priorNoise));
 
     vector<double> floam_x, floam_y;
     int limit = slamPoses.size();
     // limit = 50;
+    string output_filename1 = "optimized_poses_without_imu.txt";
+    FILE* fp_out_1 = fopen(output_filename1.c_str(), "w+");
+    fprintf(fp_out_1,
+            "#time(s),x(m),y(m),theta(m)\n");
     for(int i = 0; i < limit; i++){
+         
     	auto tempPose = slamPoses.at(i);
+        fprintf(fp_out_1, "%lld, %f,%f,%f\n",
+                tempPose.time, tempPose.x, tempPose.y, tempPose.theta);
         // cout << tempPose.idx << endl;
     	initial.insert(tempPose.idx, Pose2(tempPose.x,tempPose.y,tempPose.theta));
         floam_x.push_back(tempPose.x);
         floam_y.push_back(tempPose.y);
     }
     cout << "Poses added! Last Pose idx = " << slamPoses.at(limit-1).idx <<  endl;
-    
+    fclose(fp_out_1);
     //limit = gt.size();
+    //VECTOR_SE2 prior = slamPoses.at(0);
+    //graph.add(PriorFactor<Pose2>(prior.at(0).idx, Pose2(prior), priorNoise));
     int slamIdx = 0;
     for(int i = 0; i < limit; i++){
-        auto gpsPose = gt.at(i);
-        //if(slamPoses.at(slamIdx).time <= gpsPose.time){
+        auto gpsPose = slamPoses.at(i);
+        if(slamPoses.at(slamIdx).time <= gpsPose.time){
             // cout << slamIdx;
-            graph.add(PriorFactor<Pose2>(slamPoses.at(slamIdx).idx, Pose2(gpsPose.gt_x, gpsPose.gt_y, slamPoses.at(slamIdx).theta), priorNoise));
+            graph.add(PriorFactor<Pose2>(slamPoses.at(slamIdx).idx, Pose2(gpsPose.x, gpsPose.y, slamPoses.at(slamIdx).theta), priorNoise));
             slamIdx++;
             // break;
-        //}
+        }
     	// cout << tempPose.idx << endl;
         // graph.add(PriorFactor<Pose2>(i, Pose2(gpsPose.x, gpsPose.y, gpsPose.theta), priorNoise));
     	// initial.insert(tempPose.idx, Pose2(tempPose.x,tempPose.y,tempPose.theta));
         // floam_x.push_back(tempPose.x);
         // floam_y.push_back(tempPose.y);
     }
-    cout << "GPS priors added! Last Prior idx = " << slamIdx-1<<  endl;
-
-    //limit = imuMeasurements.size();
+    cout << "Slampose priors added! " <<  endl;
+    
+    //  for(int i = 2; i < limit; i++){
+    // 	auto tempPose = slamPoses.at(i);
+    //     graph.add(PriorFactor<Pose2>(i, Pose2(tempPose.x,tempPose.y,tempPose.theta), priorNoise));
+    // }   
+    
+    limit = imuMeasurements.size();
     for (int i = 1; i < limit; i++){ 
     	EDGE_SE2 tempEdge = imuMeasurements.at(i);
-        double num_integration = (imuMeasurements.at(i).time - imuMeasurements.at(i-1).time) / 0.1;
+        //double num_integration = (imuMeasurements.at(i).time - imuMeasurements.at(i-1).time) / 0.1;
+        double num_integration = 0.1;
         // cout << num_integration << endl;
         // break;
         // The more numbers of integrations, the higher covariance value
     	noiseModel::Gaussian::shared_ptr model = noiseModel::Diagonal::Variances(Vector3(1e-3 * num_integration, 1e-3 * num_integration, 1e-4 * num_integration)); 
-    	graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
+    	//graph.add(BetweenFactor<Pose2>(tempEdge.idx-1,tempEdge.idx, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
+        graph.add(BetweenFactor<Pose2>(i,i - 1, Pose2(tempEdge.dx,tempEdge.dy,tempEdge.dtheta), model)); 
     }
 
     cout << "EDGES added! Last Pose idx = " << imuMeasurements.at(limit-1).idx << endl;
-    
+
     GaussNewtonParams parameters; 
     parameters.relativeErrorTol = 1e-4; 
     parameters.maxIterations = 10000; 
@@ -66,7 +85,6 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     // LevenbergMarquardtOptimizer optimizer(graph, initial);
     
     Values result = optimizer.optimize();
-    cout << "Result Finished " << endl;
     //result.print(); 
     vector<double> post_x, post_y;
     //   Save results to file
@@ -75,9 +93,8 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     FILE* fp_out = fopen(output_filename.c_str(), "w+");
     fprintf(fp_out,
             "#time(s),x(m),y(m),theta(m)\n");
-    //limit = result.size();
-    //cout << "Poses added " << endl;
-    for (size_t i = 1; i < limit-1; i++) {
+
+    for (size_t i = 1; i < limit - 1; i++) {
 
         auto pose = result.at<Pose2>(i);
 
@@ -89,14 +106,12 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
         post_x.push_back(pose.x());
         post_y.push_back(pose.y());
     }
-    
     //cout << "slamePose size" << slamPoses.size() << endl;
     vector<double> gt_x,gt_y;
     for (int i = 0; i < gt.size(); i++) {
-        gt_x.push_back(gt.at(i).gt_x);
-        gt_y.push_back(gt.at(i).gt_y);
+        gt_x.push_back(gt.at(i).x);
+        gt_y.push_back(gt.at(i).y);
     }
-
     vector<double> imu_x,imu_y;
     for (int i = 0; i < imu_corr.size(); i++) {
         imu_x.push_back(imu_corr.at(i).IMU_x);
@@ -104,18 +119,35 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements, ve
     }
     fclose(fp_out);
     plt::figure(1);
-    plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+<<<<<<< HEAD
+    //plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+=======
+    // plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+>>>>>>> a44faef66dd99d4d4e4749b3c6934ebcb5eaf9a6
     plt::plot(post_x,post_y,{{"label", "Batch Result"}});
     plt::plot(imu_x,imu_y,{{"label", "IMU"}});
-    plt::plot(gt_x,gt_y,{{"label", "Ground True"}});
-    plt::title("Post Process");
+    plt::plot(gt_x,gt_y,{{"label", "Ground Truth"}});
+    plt::title("Post Processing on F-LOAM Poses using IMU");
+    plt::xlabel("X");
+    plt::ylabel("Y");
     plt::legend();
-    plt::save("result.png");
+    plt::xlabel("x");
+    plt::ylabel("Y");
+    plt::save("FLOAM_Post_Process_result.png");
     plt::figure(4);
+<<<<<<< HEAD
     plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
-    plt::plot(gt_x,gt_y,{{"label", "Ground True"}});
-    plt::title("FLOAM vs Ground True");
-    plt::save("result_FLOAMvsGroundTrue.png");
+    plt::plot(post_x,post_y,{{"label", "Batch Result"}});
+    plt::title("FLOAM vs Batch");
+    plt::save("result_FLOAMvsBatch.png");
+    plt::xlabel("x");
+    plt::ylabel("Y");
+=======
+    // plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
+    // plt::plot(post_x,post_y,{{"label", "Batch Result"}});
+    // plt::title("FLOAM vs Batch");
+    // plt::save("result_FLOAMvsBatch.png");
+>>>>>>> a44faef66dd99d4d4e4749b3c6934ebcb5eaf9a6
     /*plt::figure(2);
     plt::plot(floam_x,floam_y,"-s");
     plt::title("Floam Initial");
@@ -136,7 +168,7 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     	graph.resize(0); 
     	Values initial; 
     	if (i == 0){
-    	noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-8,1e-8,1e-8)); 
+    	noiseModel::Diagonal::shared_ptr priorNoise = noiseModel::Diagonal::Variances(Vector3(1e-7,1e-7,1e-7)); 
     	graph.add(PriorFactor<Pose2>(slamPoses.at(0).idx, Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta), priorNoise));
     		initial.insert(slamPoses.at(0).idx, Pose2(slamPoses.at(0).x,slamPoses.at(0).y,slamPoses.at(0).theta));
     	}
@@ -158,17 +190,18 @@ void runISAM(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements){
     //result.print(); 
 }
 
-void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements, vector<IMU_CORR> &imu_corr,vector<VECTOR_SE2> &slamPoses){
+void integrateIMUData(vector<VECTOR_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &imuMeasurements, vector<IMU_CORR> &imu_corr,vector<VECTOR_SE2> &slamPoses){
 
-    double prev_vel_x = 5.4;
-    double prev_vel_y = 0;
-    double prev_angle = 1.74;
-    double current_angle = 0;
-    double current_vel_x = 0;
-    double current_vel_y = 0;
+    double prev_x = 0;
+    double prev_y = 0;
+    double prev_angle = 0;
+    //double move_x = 0;
+    //double move_y = 0;
+    double current_angle = 0.01;
+    double current_move_x = 0;
+    double current_move_y = 0;
     double corr_x = 0;
     double corr_y = 0;
-    double dt;
     double dx = 0;
     double dy = 0;
     double dtheta = 0;
@@ -182,48 +215,47 @@ void integrateIMUData(vector<EDGE_SE3> &imuMeasurements_SE3, vector<EDGE_SE2> &i
     IMU_CORR imu;
     IMU_x.push_back(corr_x);
     IMU_y.push_back(corr_y);
-    int limit = imuMeasurements_SE3.size();
-    //int limit = slamPoses.size();
+    // int limit = imuMeasurements_SE3.size();
+    int limit = slamPoses.size();
     //int limit = 200;
     int imuIdx = 1;
     for(int i = 0; i < limit - 1; i++){
-        //while(slamPoses.at(i).time >= imuMeasurements_SE3.at(imuIdx).time && imuIdx < imuMeasurements_SE3.size()){
-            dt = (imuMeasurements_SE3.at(imuIdx).time - imuMeasurements_SE3.at(imuIdx-1).time) * pow(10, -9);
-            current_angle =  (double) atan2(2 * (imuMeasurements_SE3.at(imuIdx).q.w() * imuMeasurements_SE3.at(imuIdx).q.z() + imuMeasurements_SE3.at(imuIdx).q.y() * imuMeasurements_SE3.at(imuIdx).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(imuIdx).q.x(), 2) + pow(imuMeasurements_SE3.at(imuIdx).q.z(), 2)));
-            if (imuIdx == 1) {
-                cout << "current angle = " <<  current_angle << endl;
-            }
-            current_vel_x = prev_vel_x + imuMeasurements_SE3.at(imuIdx).accel(0) * dt;
-            //current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
-            // prev_vel_y = current_vel_y;
-            dx += (current_vel_x + prev_vel_x) * 0.5 * dt;
-            dy = 0;
+        while((slamPoses.at(i).time - 8*pow(10,8)) >= imuMeasurements_SE3.at(imuIdx).time && imuIdx < imuMeasurements_SE3.size()){
+            //dt = (imuMeasurements_SE3.at(imuIdx).time - imuMeasurements_SE3.at(imuIdx-1).time) * pow(10, -9);
+            //current_angle =  (double) atan2(2 * (imuMeasurements_SE3.at(imuIdx).q.w() * imuMeasurements_SE3.at(imuIdx).q.z() + imuMeasurements_SE3.at(imuIdx).q.y() * imuMeasurements_SE3.at(imuIdx).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(imuIdx).q.x(), 2) + pow(imuMeasurements_SE3.at(imuIdx).q.z(), 2)));
+            current_move_x = imuMeasurements_SE3.at(imuIdx).x - prev_x;
+            current_move_y = imuMeasurements_SE3.at(imuIdx).y - prev_y;
             imuIdx++;
-            prev_vel_x = current_vel_x;
-        //}
-        
+        }
+        dx = (double) sqrt(pow(current_move_x,2) + pow(current_move_y,2));
+        //current_vel_y = prev_vel_y + imuMeasurements_SE3.at(i).accel(1) * dt;
+        // prev_vel_y = current_vel_y;
+        dy = 0;
+        current_angle = (double) atan2(current_move_y,current_move_x);
         imuMeasurement.dx = dx;// * cos(current_angle); - current_vel_y * dt * sin(current_angle);
         imuMeasurement.dy = dy;//current_vel_x * dt// * sin(current_angle); //+ current_vel_y * dt * cos(current_angle);
-        dx = 0;
-        imuMeasurement.dtheta =  current_angle - prev_angle;//(double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2))) * dt;
-        imuMeasurement.time = imuMeasurements_SE3.at(imuIdx).time;
+        //imuMeasurement.dtheta =  current_angle - prev_angle;//(double) atan2(2 * (imuMeasurements_SE3.at(i).q.w() * imuMeasurements_SE3.at(i).q.z() + imuMeasurements_SE3.at(i).q.y() * imuMeasurements_SE3.at(i).q.x()), 1 - 2 * (pow(imuMeasurements_SE3.at(i).q.x(), 2) + pow(imuMeasurements_SE3.at(i).q.z(), 2))) * dt;
+        imuMeasurement.dtheta = current_angle - prev_angle;
+        imuMeasurement.time = imuMeasurements_SE3.at(imuIdx-1).time;
         imuMeasurement.idx = i;
         prev_angle = current_angle;
 
+        corr_x += dx * cos(current_angle);
+        corr_y += dx * sin(current_angle);
+        IMU_x.push_back(corr_x);
+        IMU_y.push_back(corr_y);
+        imu.IMU_x = corr_x;
+        imu.IMU_y = corr_y;
+        imu_corr.push_back(imu);
+        dx = 0;
+        prev_x = imuMeasurements_SE3.at(imuIdx-1).x;
+        prev_y = imuMeasurements_SE3.at(imuIdx-1).y;
         // cout << "dx = " << imuMeasurement.dx << " dy = " << imuMeasurement.dy << " dtheta = " << imuMeasurement.dtheta <<endl;
 
         imuMeasurements.push_back(imuMeasurement);
         
-        fprintf(fp_out, "%d, %f, %f, %f, %f\n",
-                    imuMeasurement.idx, dt, imuMeasurement.dx, imuMeasurement.dy, imuMeasurement.dtheta);
-        corr_x = corr_x + (current_vel_x + prev_vel_x) * 0.5 * dt * cos(current_angle);
-        corr_y = corr_y + (current_vel_x + prev_vel_x) * 0.5 * dt * sin(current_angle);
-        IMU_x.push_back(corr_x);
-        IMU_y.push_back(corr_y);
-        
-        imu.IMU_x = corr_x;
-        imu.IMU_y = corr_y;
-        imu_corr.push_back(imu);
+        fprintf(fp_out, "%d, %d, %f, %f, %f\n",
+                    imuMeasurement.idx,imuIdx-1, imuMeasurement.dx, imuMeasurement.dy, imuMeasurement.dtheta);
     }
     // cout << "In IMU Integrate \n";
     // cout << "IMU Mesurement size = " << imuMeasurements.size() << " SLAM Measurement Size = " << slamPoses.size() << endl;
@@ -246,6 +278,8 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
             pre_x = gpsMeasurements.at(i).longitude;
             pre_y = gpsMeasurements.at(i).latitude;
             pre_z = gpsMeasurements.at(i).altitude;
+            gt_point.time = gpsMeasurements.at(i).time;
+            gt_point.idx = gpsMeasurements.at(i).idx;
             gt_point.gt_x = 0;
             gt_point.gt_y = 0;
             gt_point.gt_z = 0;
@@ -256,6 +290,8 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
             gt_point.gt_x = (gpsMeasurements.at(i).longitude - pre_x) * 72880;
             gt_point.gt_y = (gpsMeasurements.at(i).latitude - pre_y) * 111111;
             gt_point.gt_z = gpsMeasurements.at(i).altitude - pre_z;
+            gt_point.time = gpsMeasurements.at(i).time;
+            gt_point.idx = gpsMeasurements.at(i).idx;
         }
         gt.push_back(gt_point);
         x.push_back(gt_point.gt_x);
@@ -270,48 +306,48 @@ void Calculate_GroundTrue(vector<GPS_DATA> &gpsMeasurements, vector<GROUND_TRUE>
 int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
-    string slam_data = "./data/floam_tf_kitti_2011_09_30_drive_new.txt";
-    //string slam_data = "./data/ground_truth_kitti_2011_09_30_drive_0018.txt";
+    //string slam_data = "./data/aloam_kitti_0018.txt";
+    string slam_data = "./data/floam_pose_kitti_2011_09_30_drive_notsync.txt";
 
-    vector<EDGE_SE3> imuMeasurements_SE3;
-    vector<EDGE_SE2> imuMeasurements;
+    vector<VECTOR_SE3> imuMeasurements_SE3;
+    vector<VECTOR_SE2> imuMeasurements;
+    vector<EDGE_SE2> imu_edge;
     vector<IMU_CORR> IMU_corr;
        
-    string imu_data = "./data/imu_kitti_2011_09_30_drive_0018.txt";
+    string imu_data = "./data/floam_imu_kitti_2011_09_30_drive_notsync.txt";
 
-    KittiCalibration kittiCalibration;
-    string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
+    //KittiCalibration kittiCalibration;
+    //string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
-    vector<GPS_DATA> GPSMeasurements;
-    vector<GROUND_TRUE> gt;
-    string gps_data = "./data/gps_kitti_2011_09_30_drive_0018.txt";
+    vector<VECTOR_SE3> GT_SE3;
+    vector<VECTOR_SE2> GT_SE2;
+    string gt_data = "./data/floam_tf_kitti_2011_09_30_drive_notsync.txt";
 
-    //int i = 10; 
-    if (read_se_3_data_new(vertices, slamPoses, slam_data))
+     bool useALOAMCorrection = false;
+
+    if (read_se_3_data_new(vertices, slamPoses, slam_data, useALOAMCorrection))
     {   
-        cout << "SLAM Poses Read Successfully!" << endl;
+        cout << "SLAM Poses Read Successfully! " << slamPoses.size() <<endl;
         // cout << vertices.at(i).q.x() << ", " << vertices.at(i).q.y() << ", " << vertices.at(i).q.z() << ", " << vertices.at(i).q.w() << endl;
         // cout << "IDX = " << vertices_se2.at(i).idx << ", Time = " << vertices_se2.at(i).time << ", X = " << vertices_se2.at(i).x << ", Y = " << vertices_se2.at(i).y << ", Theta = " << vertices_se2.at(i).theta << endl;
     }
     else exit(1);
     
-    if (loadKittiData(imuMeasurements_SE3, kittiCalibration, imu_data, imu_metadata))
+    if (read_se_3_data_new(imuMeasurements_SE3, imuMeasurements, imu_data, useALOAMCorrection))
     {
-        cout << "IMU Data Read Successfully!" << endl;
+        cout << "IMU Data Read Successfully! " << imuMeasurements_SE3.size() <<  endl;
     } 
     else exit(1);
 
-    if (loadGPSData(GPSMeasurements, gps_data))
+    if (read_se_3_data_new(GT_SE3, GT_SE2, gt_data, useALOAMCorrection))
     {
-        cout << "GPS Data Read Successfully!" << endl;
+        cout << "GT Read Successfully! " << GT_SE3.size() << endl;
     } 
     else exit(1);
 
-    Calculate_GroundTrue(GPSMeasurements, gt);
-    //cout << "GPS Size" << gt.size();
-    integrateIMUData(imuMeasurements_SE3, imuMeasurements, IMU_corr, slamPoses);
-    cout << "Inetegrated IMU" <<endl;
-    runBatch(slamPoses, imuMeasurements, gt, IMU_corr);
+    //Calculate_GroundTrue(GPSMeasurements, gt);
+    integrateIMUData(imuMeasurements_SE3, imu_edge, IMU_corr, slamPoses);
+    runBatch(slamPoses, imu_edge, GT_SE2,IMU_corr);
 
 
     plt::show();

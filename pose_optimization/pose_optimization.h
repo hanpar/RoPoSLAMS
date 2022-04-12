@@ -16,11 +16,14 @@
 #include <fstream>
 #include <iostream>
 #include <math.h>
-// #include </home/vishrut/ros_workspaces/eecs568-group17-project/pose_optimization/reading_data/matplotlib-cpp/matplotlibcpp.h>
+#include <cmath>
+#include "reading_data/matplotlib-cpp/matplotlibcpp.h"
 
 using namespace std;
 using namespace gtsam;
-// namespace plt = matplotlibcpp;
+using namespace Eigen; 
+
+namespace plt = matplotlibcpp;
 
 using symbol_shorthand::B;  // Bias  (ax,ay,az,gx,gy,gz)
 using symbol_shorthand::V;  // Vel   (xdot,ydot,zdot)
