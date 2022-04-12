@@ -284,21 +284,21 @@ int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
     //string slam_data = "./data/aloam_kitti_0018.txt";
-    string slam_data = "./data/floam_pose_kitti_2011_09_30_drive_notsync.txt";
+    string slam_data = "../data/floam_pose_kitti_2011_09_30_drive_notsync.txt";
 
     vector<VECTOR_SE3> imuMeasurements_SE3;
     vector<VECTOR_SE2> imuMeasurements;
     vector<EDGE_SE2> imu_edge;
     vector<IMU_CORR> IMU_corr;
        
-    string imu_data = "./data/floam_imu_kitti_2011_09_30_drive_notsync.txt";
+    string imu_data = "../data/floam_imu_kitti_2011_09_30_drive_notsync.txt";
 
     //KittiCalibration kittiCalibration;
     //string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
     vector<VECTOR_SE3> GT_SE3;
     vector<VECTOR_SE2> GT_SE2;
-    string gt_data = "./data/floam_tf_kitti_2011_09_30_drive_notsync.txt";
+    string gt_data = "../data/floam_tf_kitti_2011_09_30_drive_notsync.txt";
 
      bool useALOAMCorrection = false;
 
@@ -310,13 +310,13 @@ int main(const int argc, const char *argv[]) {
     }
     else exit(1);
     
-    if (read_se_3_data_new(imuMeasurements_SE3, imuMeasurements, imu_data))
+    if (read_se_3_data_new(imuMeasurements_SE3, imuMeasurements, imu_data, useALOAMCorrection))
     {
         cout << "IMU Data Read Successfully! " << imuMeasurements_SE3.size() <<  endl;
     } 
     else exit(1);
 
-    if (read_se_3_data_new(GT_SE3, GT_SE2, gt_data))
+    if (read_se_3_data_new(GT_SE3, GT_SE2, gt_data, useALOAMCorrection))
     {
         cout << "GT Read Successfully! " << GT_SE3.size() << endl;
     } 
