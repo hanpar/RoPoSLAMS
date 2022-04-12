@@ -23,9 +23,9 @@ Improve estimation accuracy for LiDAR-based SLAM algorithms.
   cmake ..
   make
   #For Floam
-  ./pose_optimization_floam 
-  ./pose_optimization_aloam
+  ./pose_optimization_floam
   #For Aloam
+  ./pose_optimization_aloam
 ```
 
 ### Created at University of Michigan - Ann Arbor as part of ROB 530.
