@@ -1,6 +1,4 @@
 #include "pose_optimization.h"
-#include "reading_data/matplotlib-cpp/matplotlibcpp.h"
-#include <cmath>
 
 using namespace std; 
 using namespace gtsam; 
@@ -119,11 +117,7 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements,  v
     }
     fclose(fp_out);
     plt::figure(1);
-<<<<<<< HEAD
     //plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
-=======
-    // plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
->>>>>>> a44faef66dd99d4d4e4749b3c6934ebcb5eaf9a6
     plt::plot(post_x,post_y,{{"label", "Batch Result"}});
     plt::plot(imu_x,imu_y,{{"label", "IMU"}});
     plt::plot(gt_x,gt_y,{{"label", "Ground Truth"}});
@@ -131,23 +125,14 @@ void runBatch(vector<VECTOR_SE2> slamPoses, vector<EDGE_SE2> imuMeasurements,  v
     plt::xlabel("X");
     plt::ylabel("Y");
     plt::legend();
-    plt::xlabel("x");
-    plt::ylabel("Y");
     plt::save("FLOAM_Post_Process_result.png");
     plt::figure(4);
-<<<<<<< HEAD
     plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
     plt::plot(post_x,post_y,{{"label", "Batch Result"}});
     plt::title("FLOAM vs Batch");
     plt::save("result_FLOAMvsBatch.png");
     plt::xlabel("x");
     plt::ylabel("Y");
-=======
-    // plt::plot(floam_x,floam_y,{{"label", "FLOAM"}});
-    // plt::plot(post_x,post_y,{{"label", "Batch Result"}});
-    // plt::title("FLOAM vs Batch");
-    // plt::save("result_FLOAMvsBatch.png");
->>>>>>> a44faef66dd99d4d4e4749b3c6934ebcb5eaf9a6
     /*plt::figure(2);
     plt::plot(floam_x,floam_y,"-s");
     plt::title("Floam Initial");
@@ -307,21 +292,21 @@ int main(const int argc, const char *argv[]) {
     vector<VECTOR_SE3> vertices;
     vector<VECTOR_SE2> slamPoses;
     //string slam_data = "./data/aloam_kitti_0018.txt";
-    string slam_data = "./data/floam_pose_kitti_2011_09_30_drive_notsync.txt";
+    string slam_data = "../data/floam_pose_kitti_2011_09_30_drive_notsync.txt";
 
     vector<VECTOR_SE3> imuMeasurements_SE3;
     vector<VECTOR_SE2> imuMeasurements;
     vector<EDGE_SE2> imu_edge;
     vector<IMU_CORR> IMU_corr;
        
-    string imu_data = "./data/floam_imu_kitti_2011_09_30_drive_notsync.txt";
+    string imu_data = "../data/floam_imu_kitti_2011_09_30_drive_notsync.txt";
 
     //KittiCalibration kittiCalibration;
     //string imu_metadata = "./data/old_data/data_latest_runs/KittiEquivBiasedImu_metadata.txt";
 
     vector<VECTOR_SE3> GT_SE3;
     vector<VECTOR_SE2> GT_SE2;
-    string gt_data = "./data/floam_tf_kitti_2011_09_30_drive_notsync.txt";
+    string gt_data = "../data/floam_tf_kitti_2011_09_30_drive_notsync.txt";
 
      bool useALOAMCorrection = false;
 
