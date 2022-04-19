@@ -1,0 +1,43 @@
+origin =
+
+    1.3215   -0.2965
+
+
+meanerror_fusionx =
+
+    4.6785
+
+
+meanerror_floamx =
+
+    4.2844
+
+
+meanerror_fusiony =
+
+    4.1975
+
+
+meanerror_floamy =
+
+    3.8338
+
+
+stdfx =
+
+    5.5789
+
+
+stdfy =
+
+    5.6066
+
+
+stdfloamx =
+
+    5.0792
+
+
+stdfloamy =
+
+    5.1096
