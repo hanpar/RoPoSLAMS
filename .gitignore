@@ -1,0 +1,4 @@
+build/
+devel/
+pose_optimization/build/
+.catkin_workspace
