@@ -27,7 +27,7 @@ Autonomous Vehicles (AVs) often operate in complex environments and need to crea
   Using the recurisve clone command below, your machine will clone our RoPOSLAMS codebase, as well as the necessary parts of FLOAM and ALOAM needed to run the program. 
 
 ```
-  git clone --recurse-submodules git@github.com:hanpar/eecs568-group17-project.git
+  git clone --recurse-submodules git@github.com:hanpar/RoPoSLAMS.git
 ```
 
 ### Building and running the code:
