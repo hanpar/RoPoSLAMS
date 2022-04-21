@@ -8,17 +8,17 @@ Autonomous Vehicles (AVs) often operate in complex environments and need to crea
 
 ### Prerequisites
 
-- Ubunutu 20.04
+ #### Ubuntu 20.04
   This was the system used to test our program.
 
-- Eigen Library (C++) 
+ #### Eigen Library (C++) 
   This library helps us perform mathematical operations necessary for processing and analyzing data from GTSAM, FLOAM, and ALOAM.
   It can be installed following the [Eigen wiki](http://eigen.tuxfamily.org/index.php?title=Main_Page#Download)
 
-- Matplotlib CPP
+ #### Matplotlib CPP
   This library helps us visualize our data analysis and resembles the plotting API used in matplotlib for Python. To install this library, visit [this](https://github.com/lava/matplotlib-cpp)
 
-- GTSAM Basics
+ #### GTSAM Basics
   To build GTSAM from source, clone or download the latest release from the [GTSAM Github repo.](https://github.com/borglab/gtsam). To understand GTSAM mathematical implemenation, visit this [tutorial.](https://gtsam.org/tutorials/intro.html)
 
 ### Clone repository recursively:
@@ -41,6 +41,10 @@ Once you have cloned RoPoSLAMS to your machine, navigate to that folder where Ro
   make
   ./pose_optimization
 ```
+
+### Our Process
+
+![RoPoSLAMS Method](process_diagram.png)
 
 ### References 
 
