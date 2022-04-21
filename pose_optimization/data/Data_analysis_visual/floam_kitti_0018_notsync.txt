@@ -1,43 +1,46 @@
+Total Length: 2523.6m
+>> visual_floam
+
 origin =
 
-    4.1879   -0.3119
+    5.3632   -0.2886
 
 
 meanerror_fusionx =
 
-    6.5629
+    6.6482
 
 
 meanerror_floamx =
 
-    6.6082
+    6.5666
 
 
 meanerror_fusiony =
 
-    5.2792
+    4.4810
 
 
 meanerror_floamy =
 
-    4.6845
+    5.7207
 
 
 stdfx =
 
-    8.7036
+    8.1763
 
 
 stdfy =
 
-    6.3801
+    5.5626
 
 
 stdfloamx =
 
-    8.3093
+    8.9837
 
 
 stdfloamy =
 
-    5.7785
+    6.8306

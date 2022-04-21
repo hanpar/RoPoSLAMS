@@ -1,43 +1,46 @@
+Total Trajectory length: 750.052m
+>> visual_floam
+
 origin =
 
-    1.3215   -0.2965
+    2.6166   -0.0336
 
 
 meanerror_fusionx =
 
-    4.6785
+    1.7362
 
 
 meanerror_floamx =
 
-    4.2844
+    2.3716
 
 
 meanerror_fusiony =
 
-    4.1975
+    1.5374
 
 
 meanerror_floamy =
 
-    3.8338
+    2.0896
 
 
 stdfx =
 
-    5.5789
+    1.6626
 
 
 stdfy =
 
-    5.6066
+    1.7788
 
 
 stdfloamx =
 
-    5.0792
+    2.5543
 
 
 stdfloamy =
 
-    5.1096
+    2.6243
